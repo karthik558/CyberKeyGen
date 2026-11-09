@@ -1,4 +1,4 @@
-// Password generation utilities
+// Password generation utilities for CyberKeyGen Extension
 
 const convertToLeetSpeak = (text) => {
   if (!text) return "";
@@ -22,7 +22,7 @@ const convertToLeetSpeak = (text) => {
     .join("");
 };
 
-// Pronounceable password generation (simplified from the original project)
+// Pronounceable password generation
 const generatePronounceablePassword = (length, includeUppercase = true, includeNumbers = true, includeSymbols = true) => {
   const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'y', 'z'];
   const vowels = ['a', 'e', 'i', 'o', 'u'];
@@ -33,7 +33,6 @@ const generatePronounceablePassword = (length, includeUppercase = true, includeN
   
   let password = '';
   while (password.length < length) {
-    // Add a consonant-vowel pair
     if (password.length + 2 <= length) {
       password += getRandomItem(consonants) + getRandomItem(vowels);
     } else {
@@ -41,7 +40,6 @@ const generatePronounceablePassword = (length, includeUppercase = true, includeN
     }
   }
 
-  // Ensure password has required character types
   if (includeUppercase) {
     const pos = Math.floor(Math.random() * password.length);
     password = password.substring(0, pos) + password[pos].toUpperCase() + password.substring(pos + 1);
@@ -85,8 +83,8 @@ const generateRandomPassword = (options) => {
   
   if (excludeAmbiguous) {
     charset = charset
-      .replace(/[0OIl1]/g, '')  // Ambiguous characters
-      .replace(/[{}[\]|;:'",.\/~`]/g, ''); // Complex symbols
+      .replace(/[0OIl1]/g, '')
+      .replace(/[{}[\]|;:'",.\/~`]/g, '');
   }
   
   if (charset === '') charset = 'abcdefghijklmnopqrstuvwxyz';
@@ -156,7 +154,6 @@ const calculatePasswordStrength = (password) => {
   if (/[0-9]/.test(password)) typesCount++;
   if (/[^a-zA-Z0-9]/.test(password)) typesCount++;
   
-  // Determine strength using same logic as main website
   let strength = "weak";
   if (length < 8) {
     strength = "weak";
@@ -168,7 +165,6 @@ const calculatePasswordStrength = (password) => {
     strength = typesCount >= 3 ? "very-strong" : "strong";
   }
   
-  // Map strength to score (for compatibility with our UI)
   let score;
   switch (strength) {
     case "weak": score = 1; break;
@@ -188,109 +184,9 @@ const calculatePasswordStrength = (password) => {
   return { score, text: strengthMap[strength] };
 };
 
-// Load saved settings from storage
-const loadSavedSettings = () => {
-  chrome.storage.local.get(['settings'], (result) => {
-    if (!result.settings) return;
-    
-    const settings = result.settings;
-    
-    // Apply default tab
-    if (settings.defaultTab) {
-      const tabButton = document.querySelector(`.tab-button[data-tab="${settings.defaultTab}"]`);
-      if (tabButton) {
-        // Trigger a click on the default tab
-        tabButton.click();
-      }
-    }
-    
-    // Apply default password length
-    if (settings.defaultLength) {
-      const passwordLength = document.getElementById('passwordLength');
-      const lengthValue = document.getElementById('lengthValue');
-      if (passwordLength && lengthValue) {
-        passwordLength.value = settings.defaultLength;
-        lengthValue.textContent = settings.defaultLength;
-        updateRangeProgress(passwordLength);
-      }
-    }
-    
-    // Apply default PIN length
-    if (settings.defaultPinLength) {
-      const pinLength = document.getElementById('pinLength');
-      const pinLengthValue = document.getElementById('pinLengthValue');
-      if (pinLength && pinLengthValue) {
-        pinLength.value = settings.defaultPinLength;
-        pinLengthValue.textContent = settings.defaultPinLength;
-        updateRangeProgress(pinLength);
-      }
-    }
-    
-    // Apply character options
-    if (settings.hasOwnProperty('defaultIncludeLowercase')) {
-      document.getElementById('includeLowercase').checked = settings.defaultIncludeLowercase;
-    }
-    
-    if (settings.hasOwnProperty('defaultIncludeUppercase')) {
-      document.getElementById('includeUppercase').checked = settings.defaultIncludeUppercase;
-    }
-    
-    if (settings.hasOwnProperty('defaultIncludeNumbers')) {
-      document.getElementById('includeNumbers').checked = settings.defaultIncludeNumbers;
-    }
-    
-    if (settings.hasOwnProperty('defaultIncludeSymbols')) {
-      document.getElementById('includeSymbols').checked = settings.defaultIncludeSymbols;
-    }
-    
-    if (settings.hasOwnProperty('defaultExcludeAmbiguous')) {
-      document.getElementById('excludeAmbiguous').checked = settings.defaultExcludeAmbiguous;
-    }
-    
-    if (settings.hasOwnProperty('defaultAvoidRepeating')) {
-      document.getElementById('avoidRepeating').checked = settings.defaultAvoidRepeating;
-    }
-    
-    if (settings.hasOwnProperty('defaultPronounceable')) {
-      document.getElementById('pronounceable').checked = settings.defaultPronounceable;
-    }
-    
-    if (settings.hasOwnProperty('defaultAvoidRepeating')) {
-      document.getElementById('avoidRepeatingPin').checked = settings.defaultAvoidRepeating;
-    }
-  });
-};
-
-// Update the strength indicator in the UI
-const updateStrengthIndicator = (password) => {
-  const { score, text } = calculatePasswordStrength(password);
-  const strengthValue = document.querySelector('.strength-value');
-  const strengthBar = document.querySelector('.strength-bar');
-
-  // Map score to strength class
-  let strengthClass = 'weak';
-  if (score === 0) {
-    strengthClass = 'weak';
-  } else if (score <= 1) {
-    strengthClass = 'weak';
-  } else if (score === 2) {
-    strengthClass = 'moderate';
-  } else if (score === 3) {
-    strengthClass = 'strong';
-  } else {
-    strengthClass = 'very-strong';
-  }
-
-  // Update the strength text
-  strengthValue.textContent = text;
-  
-  // Update the strength bar
-  strengthBar.className = 'strength-bar';
-  strengthBar.classList.add(strengthClass);
-};
-
-// Function to update the visual progress of range input sliders
+// Update the visual progress of range input sliders
 const updateRangeProgress = (slider) => {
+  if (!slider) return;
   const min = parseInt(slider.min) || 0;
   const max = parseInt(slider.max) || 100;
   const value = parseInt(slider.value) || 0;
@@ -300,149 +196,138 @@ const updateRangeProgress = (slider) => {
 
 // DOM manipulation and UI functions
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize theme
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.body.classList.add('dark');
+  // Theme management: Default to dark mode (matches website)
+  const applyTheme = (isDark) => {
+    if (isDark) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  };
+
+  chrome.storage.local.get(['theme'], (result) => {
+    if (result.theme === 'light') {
+      applyTheme(false);
+    } else {
+      // Default to dark theme like website
+      applyTheme(true);
+    }
+  });
+
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const isDarkNow = document.body.classList.contains('dark');
+      applyTheme(!isDarkNow);
+      chrome.storage.local.set({ theme: !isDarkNow ? 'dark' : 'light' });
+    });
   }
-  
+
   // Tab switching
   const tabs = document.querySelectorAll('.tab-button');
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
       tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
       
       const tabId = tab.getAttribute('data-tab');
       document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
       });
-      document.getElementById(tabId).classList.add('active');
+      const activeContent = document.getElementById(tabId);
+      if (activeContent) {
+        activeContent.classList.add('active');
+      }
+
+      // Auto generate on tab switch if empty
+      if (tabId === 'pin' && !pinOutput.value) {
+        generatePinBtn.click();
+      }
     });
   });
-  
-  // Theme toggle
-  const themeToggle = document.getElementById('themeToggle');
-  
-  // Function to update icons based on theme
-  const updateThemeIcons = (isDark) => {
-    const headerIcon = document.getElementById('headerIcon');
-    if (headerIcon) {
-      // Switch icon sources - dark icon for dark mode, light icon for light mode
-      if (isDark) {
-        headerIcon.src = headerIcon.getAttribute('data-dark-icon');
-      } else {
-        headerIcon.src = headerIcon.getAttribute('data-light-icon');
-      }
+
+  // Strength Indicator
+  const updateStrengthIndicator = (password) => {
+    const { score, text } = calculatePasswordStrength(password);
+    const strengthValue = document.querySelector('.strength-value');
+    const strengthBar = document.querySelector('.strength-bar');
+
+    if (!strengthValue || !strengthBar) return;
+
+    let strengthClass = 'weak';
+    if (score === 0 || score === 1) {
+      strengthClass = 'weak';
+    } else if (score === 2) {
+      strengthClass = 'moderate';
+    } else if (score === 3) {
+      strengthClass = 'strong';
+    } else {
+      strengthClass = 'very-strong';
     }
-    
-    // Ensure settings button icon is visible in both themes
-    const settingsButton = document.getElementById('openOptions');
-    if (settingsButton) {
-      if (isDark) {
-        settingsButton.querySelector('svg').setAttribute('stroke', 'currentColor');
-      } else {
-        settingsButton.querySelector('svg').setAttribute('stroke', 'currentColor');
-      }
-    }
+
+    strengthValue.textContent = text;
+    strengthBar.className = 'strength-bar ' + strengthClass;
   };
-  
-  themeToggle.addEventListener('click', () => {
-    const isDark = !document.body.classList.contains('dark');
-    document.body.classList.toggle('dark');
-    
-    // Update icons when theme changes
-    updateThemeIcons(document.body.classList.contains('dark'));
-    
-    // Save preference to storage
-    chrome.storage.local.set({ 
-      theme: document.body.classList.contains('dark') ? 'dark' : 'light' 
-    });
-  });
-  
-  // Get saved theme preference
-  chrome.storage.local.get(['theme'], (result) => {
-    const isDark = result.theme === 'dark';
-    if (isDark) {
-      document.body.classList.add('dark');
-    } else if (result.theme === 'light') {
-      document.body.classList.remove('dark');
-    }
-    
-    // Update icons based on current theme
-    updateThemeIcons(isDark);
-  });
-  
-  // Load saved settings
-  loadSavedSettings();
-  
-  // Setup website link
-  const webLink = document.getElementById('webLink');
-  if (webLink) {
-    webLink.href = 'https://password.karthiklal.in/';
-    webLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      chrome.tabs.create({ url: 'https://password.karthiklal.in/' });
-    });
-  }
-  
-  // Setup author link
-  const authorLink = document.getElementById('authorLink');
-  if (authorLink) {
-    authorLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      chrome.tabs.create({ url: 'https://karthiklal.in/' });
-    });
-  }
-  
+
   // Password visibility toggle
   const toggleVisibility = document.getElementById('toggleVisibility');
   const passwordOutput = document.getElementById('passwordOutput');
   const eyeIcon = document.getElementById('eyeIcon');
   const eyeOffIcon = document.getElementById('eyeOffIcon');
   
-  toggleVisibility.addEventListener('click', () => {
-    if (passwordOutput.type === 'password') {
-      passwordOutput.type = 'text';
-      eyeIcon.style.display = 'none';
-      eyeOffIcon.style.display = 'inline';
-    } else {
-      passwordOutput.type = 'password';
-      eyeIcon.style.display = 'inline';
-      eyeOffIcon.style.display = 'none';
-    }
-  });
-  
-  // Initialize password field
-  passwordOutput.type = 'text'; // Default to visible
-  
+  if (toggleVisibility && passwordOutput && eyeIcon && eyeOffIcon) {
+    toggleVisibility.addEventListener('click', () => {
+      if (passwordOutput.type === 'password') {
+        passwordOutput.type = 'text';
+        eyeIcon.style.display = 'block';
+        eyeOffIcon.style.display = 'none';
+      } else {
+        passwordOutput.type = 'password';
+        eyeIcon.style.display = 'none';
+        eyeOffIcon.style.display = 'block';
+      }
+    });
+  }
+
   // Password length slider
   const passwordLength = document.getElementById('passwordLength');
   const lengthValue = document.getElementById('lengthValue');
-  
-  // Initialize range progress
-  updateRangeProgress(passwordLength);
-  
-  passwordLength.addEventListener('input', () => {
-    lengthValue.textContent = passwordLength.value;
+  const passwordHint = document.getElementById('passwordHint');
+
+  const updateQuickLengths = (len) => {
+    document.querySelectorAll('.quick-len-btn').forEach(btn => {
+      btn.classList.toggle('active', parseInt(btn.dataset.len) === len);
+    });
+  };
+
+  if (passwordLength && lengthValue) {
     updateRangeProgress(passwordLength);
+    passwordLength.addEventListener('input', () => {
+      const len = parseInt(passwordLength.value);
+      lengthValue.textContent = len;
+      updateRangeProgress(passwordLength);
+      updateQuickLengths(len);
+      generateNewPassword();
+    });
+  }
+
+  document.querySelectorAll('.quick-len-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const len = parseInt(btn.dataset.len);
+      passwordLength.value = len;
+      lengthValue.textContent = len;
+      updateRangeProgress(passwordLength);
+      updateQuickLengths(len);
+      generateNewPassword();
+    });
   });
-  
-  // PIN length slider
-  const pinLength = document.getElementById('pinLength');
-  const pinLengthValue = document.getElementById('pinLengthValue');
-  
-  // Initialize range progress
-  updateRangeProgress(pinLength);
-  
-  pinLength.addEventListener('input', () => {
-    pinLengthValue.textContent = pinLength.value;
-    updateRangeProgress(pinLength);
-  });
-  
-  // Generate Password button
+
+  // Password generation
   const generatePasswordBtn = document.getElementById('generatePassword');
-  
-  // Function to generate a password with current options
   const generateNewPassword = () => {
     const options = {
       length: parseInt(passwordLength.value),
@@ -456,166 +341,266 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const newPassword = generateRandomPassword(options);
-    passwordOutput.value = newPassword;
+    if (passwordOutput) {
+      passwordOutput.value = newPassword;
+    }
     updateStrengthIndicator(newPassword);
+    
+    if (passwordHint) {
+      passwordHint.textContent = `${newPassword.length} characters · Generated in your browser`;
+    }
     
     return newPassword;
   };
-  
-  generatePasswordBtn.addEventListener('click', () => {
-    const newPassword = generateNewPassword();
-    
-    // Save to storage
-    savePasswordToHistory(newPassword, 'random');
-  });
-  
-  // Generate initial password when page loads
-  setTimeout(() => {
-    // Only generate if the password field is empty
-    if (!passwordOutput.value) {
-      generateNewPassword();
-    } else {
-      // Update strength indicator for existing password
-      updateStrengthIndicator(passwordOutput.value);
-    }
-  }, 500);
-  
-  // Copy Password button
-  const copyPasswordBtn = document.getElementById('copyPassword');
-  copyPasswordBtn.addEventListener('click', () => {
-    if (!passwordOutput.value) return;
-    
-    navigator.clipboard.writeText(passwordOutput.value).then(() => {
-      showCopySuccess();
+
+  if (generatePasswordBtn) {
+    generatePasswordBtn.addEventListener('click', () => {
+      const newPassword = generateNewPassword();
+      savePasswordToHistory(newPassword, 'random');
     });
-  });
-  
-  // Fill Password button
-  const fillPasswordBtn = document.getElementById('fillPassword');
-  fillPasswordBtn.addEventListener('click', () => {
-    if (!passwordOutput.value) return;
-    
-    // Send message to content script to fill the password
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, { 
-        action: 'fillPassword', 
-        password: passwordOutput.value 
+  }
+
+  // Live update on switch changes
+  const optionCheckboxes = [
+    'includeLowercase', 'includeUppercase', 'includeNumbers',
+    'includeSymbols', 'excludeAmbiguous', 'avoidRepeating', 'pronounceable'
+  ];
+  optionCheckboxes.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', () => {
+        // Prevent all checkboxes from being unchecked
+        const lowercase = document.getElementById('includeLowercase');
+        const uppercase = document.getElementById('includeUppercase');
+        const numbers = document.getElementById('includeNumbers');
+        const symbols = document.getElementById('includeSymbols');
+        if (!lowercase.checked && !uppercase.checked && !numbers.checked && !symbols.checked) {
+          el.checked = true;
+          return;
+        }
+        generateNewPassword();
       });
-      window.close();
+    }
+  });
+
+  // PIN controls
+  const pinLength = document.getElementById('pinLength');
+  const pinLengthValue = document.getElementById('pinLengthValue');
+  const pinOutput = document.getElementById('pinOutput');
+  const pinHint = document.getElementById('pinHint');
+  const generatePinBtn = document.getElementById('generatePin');
+
+  const updateQuickPinLengths = (len) => {
+    document.querySelectorAll('.quick-pin-len-btn').forEach(btn => {
+      btn.classList.toggle('active', parseInt(btn.dataset.len) === len);
+    });
+  };
+
+  if (pinLength && pinLengthValue) {
+    updateRangeProgress(pinLength);
+    pinLength.addEventListener('input', () => {
+      const len = parseInt(pinLength.value);
+      pinLengthValue.textContent = len;
+      updateRangeProgress(pinLength);
+      updateQuickPinLengths(len);
+      if (generatePinBtn) generatePinBtn.click();
+    });
+  }
+
+  document.querySelectorAll('.quick-pin-len-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const len = parseInt(btn.dataset.len);
+      pinLength.value = len;
+      pinLengthValue.textContent = len;
+      updateRangeProgress(pinLength);
+      updateQuickPinLengths(len);
+      if (generatePinBtn) generatePinBtn.click();
     });
   });
-  
-  // Generate Leet Text
+
+  if (generatePinBtn) {
+    generatePinBtn.addEventListener('click', () => {
+      const length = parseInt(pinLength.value);
+      const avoidRepeatingPin = document.getElementById('avoidRepeatingPin').checked;
+      
+      const newPin = generatePin(length, avoidRepeatingPin);
+      if (pinOutput) pinOutput.value = newPin;
+      if (pinHint) pinHint.textContent = `${newPin.length} digits · Generated in your browser`;
+      
+      savePasswordToHistory(newPin, 'pin');
+    });
+  }
+
+  const avoidRepeatingPin = document.getElementById('avoidRepeatingPin');
+  if (avoidRepeatingPin) {
+    avoidRepeatingPin.addEventListener('change', () => {
+      if (generatePinBtn) generatePinBtn.click();
+    });
+  }
+
+  // Leet (Pattern / From text) controls
   const baseText = document.getElementById('baseText');
   const leetOutput = document.getElementById('leetOutput');
   const generateLeetBtn = document.getElementById('generateLeet');
-  
-  generateLeetBtn.addEventListener('click', () => {
-    if (!baseText.value) return;
-    
-    const leetText = convertToLeetSpeak(baseText.value);
-    leetOutput.value = leetText;
-    
-    // Save to storage
-    savePasswordToHistory(leetText, 'leet');
-  });
-  
-  // Copy Leet Text
-  const copyLeetBtn = document.getElementById('copyLeet');
-  copyLeetBtn.addEventListener('click', () => {
-    if (!leetOutput.value) return;
-    
-    navigator.clipboard.writeText(leetOutput.value).then(() => {
-      showCopySuccess();
+
+  if (generateLeetBtn && baseText && leetOutput) {
+    generateLeetBtn.addEventListener('click', () => {
+      if (!baseText.value) return;
+      const leetText = convertToLeetSpeak(baseText.value);
+      leetOutput.value = leetText;
+      savePasswordToHistory(leetText, 'leet');
     });
-  });
-  
-  // Fill Leet Text
-  const fillLeetBtn = document.getElementById('fillLeet');
-  fillLeetBtn.addEventListener('click', () => {
-    if (!leetOutput.value) return;
-    
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, { 
-        action: 'fillPassword', 
-        password: leetOutput.value 
-      });
-      window.close();
+
+    baseText.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        generateLeetBtn.click();
+      }
     });
-  });
-  
-  // Generate PIN
-  const pinOutput = document.getElementById('pinOutput');
-  const generatePinBtn = document.getElementById('generatePin');
-  
-  generatePinBtn.addEventListener('click', () => {
-    const length = parseInt(pinLength.value);
-    const avoidRepeatingPin = document.getElementById('avoidRepeatingPin').checked;
-    
-    const newPin = generatePin(length, avoidRepeatingPin);
-    pinOutput.value = newPin;
-    
-    // Save to storage
-    savePasswordToHistory(newPin, 'pin');
-  });
-  
-  // Copy PIN
-  const copyPinBtn = document.getElementById('copyPin');
-  copyPinBtn.addEventListener('click', () => {
-    if (!pinOutput.value) return;
-    
-    navigator.clipboard.writeText(pinOutput.value).then(() => {
-      showCopySuccess();
+
+    baseText.addEventListener('input', () => {
+      if (baseText.value.trim()) {
+        const leetText = convertToLeetSpeak(baseText.value);
+        leetOutput.value = leetText;
+      } else {
+        leetOutput.value = '';
+      }
     });
-  });
-  
-  // Fill PIN
-  const fillPinBtn = document.getElementById('fillPin');
-  fillPinBtn.addEventListener('click', () => {
-    if (!pinOutput.value) return;
-    
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, { 
-        action: 'fillPassword', 
-        password: pinOutput.value 
-      });
-      window.close();
-    });
-  });
-  
-  // Settings button
-  const openOptionsBtn = document.getElementById('openOptions');
-  openOptionsBtn.addEventListener('click', () => {
-    // Open options page
-    chrome.runtime.openOptionsPage();
-  });
-  
-  // Create a notification for copy success
-  function showCopySuccess() {
-    // Check if notification exists, if not create it
+  }
+
+  // Copy buttons with visual feedback
+  const showCopySuccess = (btn) => {
     let copySuccess = document.getElementById('copySuccess');
     if (!copySuccess) {
       copySuccess = document.createElement('div');
       copySuccess.id = 'copySuccess';
-      copySuccess.textContent = 'Copied to clipboard!';
       document.body.appendChild(copySuccess);
     }
-    
-    // Show notification
+    copySuccess.textContent = 'Copied to clipboard!';
     copySuccess.classList.add('show');
+
+    if (btn) {
+      const textSpan = btn.querySelector('.btn-text') || btn.querySelector('span');
+      if (textSpan) {
+        const origText = textSpan.textContent;
+        textSpan.textContent = 'Copied!';
+        setTimeout(() => { textSpan.textContent = origText; }, 1500);
+      }
+    }
     
-    // Hide after 2 seconds
     setTimeout(() => {
       copySuccess.classList.remove('show');
     }, 2000);
+  };
+
+  const copyPasswordBtn = document.getElementById('copyPassword');
+  if (copyPasswordBtn) {
+    copyPasswordBtn.addEventListener('click', () => {
+      if (!passwordOutput.value) return;
+      navigator.clipboard.writeText(passwordOutput.value).then(() => {
+        showCopySuccess(copyPasswordBtn);
+      });
+    });
   }
-  
-  // Save password to history in storage
+
+  const copyLeetBtn = document.getElementById('copyLeet');
+  if (copyLeetBtn) {
+    copyLeetBtn.addEventListener('click', () => {
+      if (!leetOutput.value) return;
+      navigator.clipboard.writeText(leetOutput.value).then(() => {
+        showCopySuccess(copyLeetBtn);
+      });
+    });
+  }
+
+  const copyPinBtn = document.getElementById('copyPin');
+  if (copyPinBtn) {
+    copyPinBtn.addEventListener('click', () => {
+      if (!pinOutput.value) return;
+      navigator.clipboard.writeText(pinOutput.value).then(() => {
+        showCopySuccess(copyPinBtn);
+      });
+    });
+  }
+
+  // Fill password in active webpage
+  const fillPasswordBtn = document.getElementById('fillPassword');
+  if (fillPasswordBtn) {
+    fillPasswordBtn.addEventListener('click', () => {
+      if (!passwordOutput.value) return;
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs && tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, { 
+            action: 'fillPassword', 
+            password: passwordOutput.value 
+          });
+          window.close();
+        }
+      });
+    });
+  }
+
+  const fillLeetBtn = document.getElementById('fillLeet');
+  if (fillLeetBtn) {
+    fillLeetBtn.addEventListener('click', () => {
+      if (!leetOutput.value) return;
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs && tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, { 
+            action: 'fillPassword', 
+            password: leetOutput.value 
+          });
+          window.close();
+        }
+      });
+    });
+  }
+
+  const fillPinBtn = document.getElementById('fillPin');
+  if (fillPinBtn) {
+    fillPinBtn.addEventListener('click', () => {
+      if (!pinOutput.value) return;
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs && tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, { 
+            action: 'fillPassword', 
+            password: pinOutput.value 
+          });
+          window.close();
+        }
+      });
+    });
+  }
+
+  // Open Options Page
+  const openOptionsBtn = document.getElementById('openOptions');
+  if (openOptionsBtn) {
+    openOptionsBtn.addEventListener('click', () => {
+      chrome.runtime.openOptionsPage();
+    });
+  }
+
+  // External Links
+  const webLink = document.getElementById('webLink');
+  if (webLink) {
+    webLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: 'https://password.karthiklal.in/' });
+    });
+  }
+
+  const authorLink = document.getElementById('authorLink');
+  if (authorLink) {
+    authorLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: 'https://karthiklal.in/' });
+    });
+  }
+
+  // History storage
   function savePasswordToHistory(pwd, type) {
+    if (!pwd) return;
     chrome.storage.local.get(['passwordHistory'], (result) => {
       const history = result.passwordHistory || [];
-      
-      // Add new password to history
       const newEntry = {
         password: pwd,
         timestamp: new Date().toISOString(),
@@ -623,18 +608,59 @@ document.addEventListener('DOMContentLoaded', () => {
         type: type
       };
       
-      // Limit to 20 entries
       if (history.length >= 20) {
         history.pop();
       }
-      
       history.unshift(newEntry);
-      
-      // Save back to storage
       chrome.storage.local.set({ passwordHistory: history });
     });
   }
-  
-  // Generate initial password on popup open
-  generatePasswordBtn.click();
+
+  // Load saved options defaults if present
+  chrome.storage.local.get(['settings'], (result) => {
+    if (result.settings) {
+      const settings = result.settings;
+      if (settings.defaultTab) {
+        const tabButton = document.querySelector(`.tab-button[data-tab="${settings.defaultTab}"]`);
+        if (tabButton) tabButton.click();
+      }
+      if (settings.defaultLength && passwordLength) {
+        passwordLength.value = settings.defaultLength;
+        lengthValue.textContent = settings.defaultLength;
+        updateRangeProgress(passwordLength);
+        updateQuickLengths(settings.defaultLength);
+      }
+      if (settings.defaultPinLength && pinLength) {
+        pinLength.value = settings.defaultPinLength;
+        pinLengthValue.textContent = settings.defaultPinLength;
+        updateRangeProgress(pinLength);
+        updateQuickPinLengths(settings.defaultPinLength);
+      }
+      if (settings.hasOwnProperty('defaultIncludeLowercase')) {
+        document.getElementById('includeLowercase').checked = settings.defaultIncludeLowercase;
+      }
+      if (settings.hasOwnProperty('defaultIncludeUppercase')) {
+        document.getElementById('includeUppercase').checked = settings.defaultIncludeUppercase;
+      }
+      if (settings.hasOwnProperty('defaultIncludeNumbers')) {
+        document.getElementById('includeNumbers').checked = settings.defaultIncludeNumbers;
+      }
+      if (settings.hasOwnProperty('defaultIncludeSymbols')) {
+        document.getElementById('includeSymbols').checked = settings.defaultIncludeSymbols;
+      }
+      if (settings.hasOwnProperty('defaultExcludeAmbiguous')) {
+        document.getElementById('excludeAmbiguous').checked = settings.defaultExcludeAmbiguous;
+      }
+      if (settings.hasOwnProperty('defaultAvoidRepeating')) {
+        document.getElementById('avoidRepeating').checked = settings.defaultAvoidRepeating;
+        document.getElementById('avoidRepeatingPin').checked = settings.defaultAvoidRepeating;
+      }
+      if (settings.hasOwnProperty('defaultPronounceable')) {
+        document.getElementById('pronounceable').checked = settings.defaultPronounceable;
+      }
+    }
+
+    // Initial password generation
+    generateNewPassword();
+  });
 });

@@ -3,26 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CyberKeyGen</title>
+  <title>CyberKeyGen | Password Generator</title>
   <link rel="stylesheet" href="popup.css" />
   <link rel="icon" href="../icons/favicon.png" type="image/png" />
 </head>
-<body>
+<body class="dark">
   <div class="container">
-    <header>
-      <p class="eyebrow">Security, simplified</p>
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="eyebrow">
+          <svg class="brand-shield" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+          <span>CyberKeyGen</span>
+        </div>
+        <h1 class="header-title">Strong passwords. Zero fuss.</h1>
+        <p class="header-subtitle">Your next password starts here. Create, customize, and copy in seconds.</p>
+      </div>
       <div class="header-actions">
-        <button id="openOptions" class="header-btn" aria-label="Settings">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button id="openOptions" class="icon-btn" aria-label="Settings" title="Extension Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
         </button>
-        <button id="themeToggle" class="header-btn" aria-label="Toggle theme">
-          <svg id="darkIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle theme" title="Toggle theme">
+          <svg id="darkIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
-          <svg id="lightIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg id="lightIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -36,278 +47,306 @@
         </button>
       </div>
     </header>
-    
-    <section class="intro">
-      <h1>A stronger start.</h1>
-      <p>Generate a password. Make it yours.</p>
-    </section>
 
-    <div class="tabs">
-      <button class="tab-button active" data-tab="random">Random</button>
-      <button class="tab-button" data-tab="pattern">Pattern</button>
-      <button class="tab-button" data-tab="pin">PIN</button>
+    <!-- Segmented Tabs -->
+    <div class="segmented-tabs-list" role="tablist">
+      <button class="tab-button active" data-tab="random" role="tab" aria-selected="true">Random</button>
+      <button class="tab-button" data-tab="pattern" role="tab" aria-selected="false">From text</button>
+      <button class="tab-button" data-tab="pin" role="tab" aria-selected="false">PIN</button>
     </div>
 
-    <div id="random" class="tab-content active">
-      <div class="password-display">
-        <div class="password-field">
-          <input type="text" id="passwordOutput" readonly />
-          <button id="toggleVisibility" aria-label="Toggle password visibility">
-            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <!-- Tab 1: Random Password -->
+    <div id="random" class="tab-content active" role="tabpanel">
+      <!-- Premium Password Display Card -->
+      <div class="premium-display-card">
+        <div class="display-card-header">
+          <span class="display-card-label">YOUR PASSWORD</span>
+          <button id="toggleVisibility" class="icon-btn-ghost" aria-label="Toggle password visibility" title="Toggle visibility">
+            <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
-            <svg id="eyeOffIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg id="eyeOffIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
               <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
               <line x1="1" y1="1" x2="23" y2="23"></line>
             </svg>
           </button>
         </div>
-        <div class="action-buttons">
-          <button id="generatePassword" class="primary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M23 4v6h-6"></path>
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-            </svg>
-            Generate
-          </button>
-          <button id="copyPassword" aria-label="Copy password">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-            Copy
-          </button>
-          <button id="fillPassword" aria-label="Fill password in form">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 11 12 14 22 4"></polyline>
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-            </svg>
-            Fill
-          </button>
+        <div class="password-field-wrap">
+          <input type="text" id="passwordOutput" class="password-value-input" readonly spellcheck="false" autocomplete="off" />
         </div>
-        <div class="strength-meter">
-          <div class="strength-container">
-            <div class="strength-header">
-              <span class="strength-header-text">Password Strength</span>
-              <span class="strength-value">Generate a password</span>
-            </div>
-            <div class="strength-bar-bg">
-              <div class="strength-bar"></div>
-            </div>
-          </div>
+        <p class="display-card-hint" id="passwordHint">16 characters · Generated in your browser</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button id="generatePassword" class="btn btn-primary" title="Generate new password">
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 4v6h-6"></path>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span>Generate</span>
+        </button>
+        <button id="copyPassword" class="btn btn-outline" aria-label="Copy password" title="Copy to clipboard">
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span class="btn-text">Copy</span>
+        </button>
+        <button id="fillPassword" class="btn btn-outline" aria-label="Fill password in form" title="Auto-fill password in webpage">
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          <span>Fill</span>
+        </button>
+      </div>
+
+      <!-- Strength Meter -->
+      <div class="strength-meter">
+        <div class="strength-header">
+          <span class="strength-header-text">Password strength</span>
+          <span class="strength-value">Strong</span>
+        </div>
+        <div class="strength-bar-bg" role="progressbar" aria-label="Password strength">
+          <div class="strength-bar"></div>
         </div>
       </div>
 
-      <div class="settings-section">
-        <div class="setting">
+      <!-- Settings / Customization Card -->
+      <div class="customize-card">
+        <div class="customize-header">
+          <h2 class="customize-title">Customize password</h2>
+          <span class="customize-subtitle">Set your preferences, then generate.</span>
+        </div>
+
+        <!-- Password Length Slider -->
+        <div class="setting-block">
           <div class="slider-header">
-            <label for="passwordLength" class="slider-label">Password Length</label>
-            <span class="slider-value" id="lengthValue">16</span>
+            <label for="passwordLength" class="setting-title">Password Length</label>
+            <span class="badge-mono" id="lengthValue">16</span>
           </div>
           <div class="slider-container">
             <input type="range" id="passwordLength" min="8" max="128" value="16" />
           </div>
+          <div class="quick-lengths" aria-label="Quick password lengths">
+            <button type="button" class="quick-len-btn" data-len="12">12</button>
+            <button type="button" class="quick-len-btn active" data-len="16">16</button>
+            <button type="button" class="quick-len-btn" data-len="24">24</button>
+            <button type="button" class="quick-len-btn" data-len="32">32</button>
+          </div>
         </div>
-        
-        <div class="toggle-container">
-          <div class="toggles-grid">
-            <div class="setting switch">
-              <div class="setting-label-group">
-                <label for="includeLowercase">Lowercase</label>
-                <span class="setting-description">a-z (Include lowercase letters)</span>
-              </div>
-              <label class="switch-wrapper" for="includeLowercase">
-                <input type="checkbox" id="includeLowercase" class="switch-input" checked />
-                <span class="switch-track">
-                  <span class="switch-thumb"></span>
-                </span>
-              </label>
+
+        <div class="section-divider"></div>
+
+        <!-- Character Types & Options -->
+        <div class="toggles-list">
+          <div class="switch-row">
+            <div class="switch-label-group">
+              <label for="includeLowercase" class="switch-title">Lowercase</label>
+              <span class="switch-desc">a-z (Include lowercase letters)</span>
             </div>
-            
-            <div class="setting switch">
-              <div class="setting-label-group">
-                <label for="includeUppercase">Uppercase</label>
-                <span class="setting-description">A-Z (Include uppercase letters)</span>
-              </div>
-              <label class="switch-wrapper" for="includeUppercase">
-                <input type="checkbox" id="includeUppercase" class="switch-input" checked />
-                <span class="switch-track">
-                  <span class="switch-thumb"></span>
-                </span>
-              </label>
+            <label class="switch-wrapper" for="includeLowercase">
+              <input type="checkbox" id="includeLowercase" class="switch-input" checked />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+
+          <div class="switch-row">
+            <div class="switch-label-group">
+              <label for="includeUppercase" class="switch-title">Uppercase</label>
+              <span class="switch-desc">A-Z (Include uppercase letters)</span>
             </div>
-            
-            <div class="setting switch">
-              <div class="setting-label-group">
-                <label for="includeNumbers">Numbers</label>
-                <span class="setting-description">0-9 (Include numeric digits)</span>
-              </div>
-              <label class="switch-wrapper" for="includeNumbers">
-                <input type="checkbox" id="includeNumbers" class="switch-input" checked />
-                <span class="switch-track">
-                  <span class="switch-thumb"></span>
-                </span>
-              </label>
+            <label class="switch-wrapper" for="includeUppercase">
+              <input type="checkbox" id="includeUppercase" class="switch-input" checked />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+
+          <div class="switch-row">
+            <div class="switch-label-group">
+              <label for="includeNumbers" class="switch-title">Numbers</label>
+              <span class="switch-desc">0-9 (Include numeric digits)</span>
             </div>
-            
-            <div class="setting switch">
-              <div class="setting-label-group">
-                <label for="includeSymbols">Symbols</label>
-                <span class="setting-description">!@#$%^&*() (Include special characters)</span>
-              </div>
-              <label class="switch-wrapper" for="includeSymbols">
-                <input type="checkbox" id="includeSymbols" class="switch-input" checked />
-                <span class="switch-track">
-                  <span class="switch-thumb"></span>
-                </span>
-              </label>
+            <label class="switch-wrapper" for="includeNumbers">
+              <input type="checkbox" id="includeNumbers" class="switch-input" checked />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+
+          <div class="switch-row">
+            <div class="switch-label-group">
+              <label for="includeSymbols" class="switch-title">Symbols</label>
+              <span class="switch-desc">!@#$%^&* (Include special characters)</span>
             </div>
-            
-            <div class="setting switch">
-              <div class="setting-label-group">
-                <label for="excludeAmbiguous">Exclude Ambiguous</label>
-                <span class="setting-description">Remove similar characters (iIl1Lo0O)</span>
-              </div>
-              <label class="switch-wrapper" for="excludeAmbiguous">
-                <input type="checkbox" id="excludeAmbiguous" class="switch-input" />
-                <span class="switch-track">
-                  <span class="switch-thumb"></span>
-                </span>
-              </label>
+            <label class="switch-wrapper" for="includeSymbols">
+              <input type="checkbox" id="includeSymbols" class="switch-input" checked />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+
+          <div class="switch-row">
+            <div class="switch-label-group">
+              <label for="excludeAmbiguous" class="switch-title">Exclude Ambiguous</label>
+              <span class="switch-desc">Remove similar characters (iIl1Lo0O)</span>
             </div>
-            
-            <div class="setting switch">
-              <div class="setting-label-group">
-                <label for="avoidRepeating">Avoid Repeating</label>
-                <span class="setting-description">Prevent repeated characters in sequence</span>
-              </div>
-              <label class="switch-wrapper" for="avoidRepeating">
-                <input type="checkbox" id="avoidRepeating" class="switch-input" />
-                <span class="switch-track">
-                  <span class="switch-thumb"></span>
-                </span>
-              </label>
+            <label class="switch-wrapper" for="excludeAmbiguous">
+              <input type="checkbox" id="excludeAmbiguous" class="switch-input" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+
+          <div class="switch-row">
+            <div class="switch-label-group">
+              <label for="avoidRepeating" class="switch-title">Avoid Repeating</label>
+              <span class="switch-desc">Prevent repeated characters in sequence</span>
             </div>
-            
-            <div class="setting switch">
-              <div class="setting-label-group">
-                <label for="pronounceable">Pronounceable</label>
-                <span class="setting-description">Generate easy-to-pronounce passwords</span>
-              </div>
-              <label class="switch-wrapper" for="pronounceable">
-                <input type="checkbox" id="pronounceable" class="switch-input" />
-                <span class="switch-track">
-                  <span class="switch-thumb"></span>
-                </span>
-              </label>
+            <label class="switch-wrapper" for="avoidRepeating">
+              <input type="checkbox" id="avoidRepeating" class="switch-input" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+
+          <div class="switch-row">
+            <div class="switch-label-group">
+              <label for="pronounceable" class="switch-title">Pronounceable</label>
+              <span class="switch-desc">Generate easy-to-pronounce passwords</span>
             </div>
+            <label class="switch-wrapper" for="pronounceable">
+              <input type="checkbox" id="pronounceable" class="switch-input" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="pattern" class="tab-content">
-      <div class="pattern-section">
-        <div class="setting">
-          <label for="baseText">Base Text</label>
-          <input type="text" id="baseText" placeholder="Enter a word or phrase" />
+    <!-- Tab 2: Pattern (From text) -->
+    <div id="pattern" class="tab-content" role="tabpanel">
+      <div class="input-card">
+        <label for="baseText" class="setting-title">Your starting word or phrase</label>
+        <input type="text" id="baseText" class="text-input" placeholder="e.g. a quiet morning" />
+        <p class="input-subtext">We'll mix your text with random characters.</p>
+      </div>
+
+      <div class="premium-display-card">
+        <div class="display-card-header">
+          <span class="display-card-label">CONVERTED PASSWORD</span>
         </div>
-        <div class="password-display">
-          <div class="password-field">
-            <input type="text" id="leetOutput" readonly />
-          </div>
-          <div class="action-buttons">
-            <button id="generateLeet" class="primary">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M23 4v6h-6"></path>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-              </svg>
-              Convert
-            </button>
-            <button id="copyLeet" aria-label="Copy leet text">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              Copy
-            </button>
-            <button id="fillLeet" aria-label="Fill leet text in form">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 11 12 14 22 4"></polyline>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-              </svg>
-              Fill
-            </button>
-          </div>
+        <div class="password-field-wrap">
+          <input type="text" id="leetOutput" class="password-value-input" readonly placeholder="Enter text above to convert" />
         </div>
+      </div>
+
+      <div class="action-buttons">
+        <button id="generateLeet" class="btn btn-primary">
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 4v6h-6"></path>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span>Convert</span>
+        </button>
+        <button id="copyLeet" class="btn btn-outline" aria-label="Copy text">
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span class="btn-text">Copy</span>
+        </button>
+        <button id="fillLeet" class="btn btn-outline" aria-label="Fill in form">
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          <span>Fill</span>
+        </button>
       </div>
     </div>
 
-    <div id="pin" class="tab-content">
-      <div class="pin-section">
-        <div class="setting">
+    <!-- Tab 3: PIN Generator -->
+    <div id="pin" class="tab-content" role="tabpanel">
+      <!-- Premium PIN Display Card -->
+      <div class="premium-display-card">
+        <div class="display-card-header">
+          <span class="display-card-label">YOUR PIN</span>
+        </div>
+        <div class="password-field-wrap">
+          <input type="text" id="pinOutput" class="password-value-input pin-value-input" readonly spellcheck="false" autocomplete="off" />
+        </div>
+        <p class="display-card-hint" id="pinHint">6 digits · Generated in your browser</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button id="generatePin" class="btn btn-primary" title="Generate PIN">
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 4v6h-6"></path>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span>Generate</span>
+        </button>
+        <button id="copyPin" class="btn btn-outline" aria-label="Copy PIN" title="Copy to clipboard">
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span class="btn-text">Copy</span>
+        </button>
+        <button id="fillPin" class="btn btn-outline" aria-label="Fill PIN in form" title="Auto-fill PIN in webpage">
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          <span>Fill</span>
+        </button>
+      </div>
+
+      <!-- PIN Settings Card -->
+      <div class="customize-card">
+        <div class="setting-block">
           <div class="slider-header">
-            <label for="pinLength" class="slider-label">PIN Length</label>
-            <span class="slider-value" id="pinLengthValue">6</span>
+            <label for="pinLength" class="setting-title">PIN Length</label>
+            <span class="badge-mono" id="pinLengthValue">6</span>
           </div>
           <div class="slider-container">
             <input type="range" id="pinLength" min="4" max="12" value="6" />
           </div>
+          <div class="quick-lengths" aria-label="Quick PIN lengths">
+            <button type="button" class="quick-pin-len-btn" data-len="4">4</button>
+            <button type="button" class="quick-pin-len-btn active" data-len="6">6</button>
+            <button type="button" class="quick-pin-len-btn" data-len="8">8</button>
+          </div>
         </div>
-        
-        <div class="toggle-container">
-          <div class="toggles-grid">
-            <div class="setting switch">
-              <div class="setting-label-group">
-                <label for="avoidRepeatingPin">Avoid Repeating Digits</label>
-                <span class="setting-description">Prevent the same digit from appearing more than once</span>
-              </div>
-              <label class="switch-wrapper" for="avoidRepeatingPin">
-                <input type="checkbox" id="avoidRepeatingPin" class="switch-input" />
-                <span class="switch-track">
-                  <span class="switch-thumb"></span>
-                </span>
-              </label>
+
+        <div class="section-divider"></div>
+
+        <div class="toggles-list">
+          <div class="switch-row">
+            <div class="switch-label-group">
+              <label for="avoidRepeatingPin" class="switch-title">Avoid Repeating Digits</label>
+              <span class="switch-desc">Prevent the same digit from appearing more than once</span>
             </div>
-          </div>
-        </div>
-        
-        <div class="password-display">
-          <div class="pin-display">
-            <input type="text" id="pinOutput" class="pin-output" readonly />
-          </div>
-          <div class="action-buttons">
-            <button id="generatePin" class="primary">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M23 4v6h-6"></path>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-              </svg>
-              Generate
-            </button>
-            <button id="copyPin" aria-label="Copy PIN">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              Copy
-            </button>
-            <button id="fillPin" aria-label="Fill PIN in form">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 11 12 14 22 4"></polyline>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-              </svg>
-              Fill
-            </button>
+            <label class="switch-wrapper" for="avoidRepeatingPin">
+              <input type="checkbox" id="avoidRepeatingPin" class="switch-input" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Footer matching website -->
+    <footer class="app-footer">
+      <a href="https://password.karthiklal.in/" id="webLink" class="web-link" target="_blank" rel="noopener noreferrer">
+        Open web app ↗
+      </a>
+      <div class="copyright">
+        © 2026 CyberKeyGen · Created by <a href="https://karthiklal.in" id="authorLink" class="author-link" target="_blank" rel="noopener noreferrer">Karthik Lal</a>
+      </div>
+    </footer>
   </div>
-  <footer>
-    <a href="#" id="webLink" class="web-link" target="_blank" rel="noopener noreferrer">Open web app ↗</a>
-    <div class="copyright">© 2026 CyberKeyGen • Created by <a href="https://karthiklal.in" id="authorLink" class="author-link" target="_blank">KARTHIK LAL</a></div>
-  </footer>
+
   <script src="popup.js"></script>
 </body>
 </html>
