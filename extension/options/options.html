@@ -3,542 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CyberKeyGen | Options</title>
+  <title>CyberKeyGen | Extension Settings</title>
   <link rel="icon" href="../icons/favicon.png" type="image/png" />
-  <style>
-    :root {
-      --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      --text-primary: hsl(0, 0%, 0%);
-      --text-secondary: hsl(0, 0%, 45%);
-      --background-primary: hsl(0, 0%, 100%);
-      --background-secondary: hsl(0, 0%, 96%);
-      --border-color: hsl(0, 0%, 88%);
-      --primary-color: hsl(0, 0%, 0%);
-      --primary-hover: hsl(0, 0%, 15%);
-      --error-color: hsl(0, 0%, 30%);
-      --success-color: hsl(0, 0%, 10%);
-      --focus-ring: 0 0 0 2px rgba(0, 0, 0, 0.15);
-      --radius: 0.75rem;
-      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      --transition: all 0.25s ease;
-      --button-text-color: var(--text-primary);
-      --primary-button-text: #ffffff;
-      --checkmark-color: #ffffff;
-    }
-
-    .dark {
-      --text-primary: hsl(0, 0%, 100%);
-      --text-secondary: hsl(0, 0%, 60%);
-      --background-primary: hsl(0, 0%, 5%);
-      --background-secondary: hsl(0, 0%, 12%);
-      --border-color: hsl(0, 0%, 20%);
-      --primary-color: hsl(0, 0%, 100%);
-      --primary-hover: hsl(0, 0%, 85%);
-      --button-text-color: var(--text-primary);
-      --primary-button-text: #000000;
-      --checkmark-color: #000000;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: var(--font-family);
-      background: var(--background-primary);
-      color: var(--text-primary);
-      padding: 24px;
-      line-height: 1.5;
-      transition: var(--transition);
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo img {
-      width: 32px;
-      height: 32px;
-    }
-
-    .logo h1 {
-      font-size: 20px;
-      font-weight: 600;
-    }
-    
-    .logo .subtitle {
-      font-size: 12px;
-      background-color: var(--background-secondary);
-      border-radius: 1rem;
-      padding: 4px 10px;
-      margin-left: 8px;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-    
-    .footer-copyright {
-      margin-top: 24px;
-      text-align: center;
-      color: var(--text-secondary);
-      font-size: 12px;
-      border-top: 1px solid var(--border-color);
-      padding-top: 16px;
-    }
-
-    .theme-toggle button {
-      background: none;
-      border: none;
-      color: var(--text-primary);
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .theme-toggle button:hover {
-      background-color: var(--background-secondary);
-    }
-
-    #darkIcon {
-      display: none;
-    }
-
-    .dark #darkIcon {
-      display: inline;
-    }
-
-    .dark #lightIcon {
-      display: none;
-    }
-
-    .section {
-      background-color: var(--background-secondary);
-      padding: 20px;
-      border-radius: var(--radius);
-      margin-bottom: 24px;
-    }
-
-    h2 {
-      font-size: 18px;
-      margin-bottom: 16px;
-      color: var(--primary-color);
-    }
-
-    .settings-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-    }
-
-    .setting {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .setting-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .setting-row .setting-label {
-      flex: 1;
-      min-width: 200px;
-    }
-
-    label {
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    input[type="checkbox"] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-      border: 1px solid var(--border-color);
-      background-color: var(--background-primary);
-      outline: none;
-      cursor: pointer;
-      position: relative;
-    }
-    
-    input[type="checkbox"]:checked {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-    }
-    
-    input[type="checkbox"]:checked::before {
-      content: '✓';
-      color: var(--checkmark-color);
-      font-size: 11px;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.3);
-    }
-
-    input[type="number"] {
-      width: 60px;
-      padding: 6px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border-color);
-      background-color: var(--background-primary);
-      color: var(--text-primary);
-    }
-
-    input[type="number"]:focus,
-    select:focus {
-      outline: none;
-      box-shadow: var(--focus-ring);
-      border-color: var(--primary-color);
-    }
-
-    select {
-      padding: 6px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border-color);
-      background-color: var(--background-primary);
-      color: var(--text-primary);
-    }
-
-    .shortcut-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .shortcut-key {
-      display: inline-block;
-      padding: 4px 8px;
-      background-color: var(--background-primary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      font-family: monospace;
-      font-size: 12px;
-      min-width: 300px;
-    }
-
-    .button-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    button {
-      padding: 8px 16px;
-      border-radius: var(--radius);
-      font-weight: 500;
-      cursor: pointer;
-      border: 1px solid var(--border-color);
-      background-color: var(--background-secondary);
-      color: var(--button-text-color);
-    }
-    
-    button svg {
-      stroke: var(--button-text-color);
-    }
-
-    button.primary {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      color: var(--primary-button-text);
-    }
-    
-    button.primary svg {
-      stroke: var(--primary-button-text);
-    }
-
-    button.primary:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .history-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 16px;
-    }
-
-    .history-table th,
-    .history-table td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .history-table th {
-      font-weight: 600;
-      color: var(--text-secondary);
-      font-size: 12px;
-    }
-
-    .history-table tr:last-child td {
-      border-bottom: none;
-    }
-
-    .password-cell {
-      font-family: monospace;
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .strength-indicator {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      margin-right: 6px;
-    }
-
-    .strength-weak {
-      background-color: #ef4444;
-      opacity: 1;
-    }
-
-    .strength-moderate {
-      background-color: #f97316;
-      opacity: 1;
-    }
-
-    .strength-strong {
-      background-color: #22c55e;
-      opacity: 1;
-    }
-
-    .strength-very-strong {
-      background-color: #059669;
-    }
-
-    .actions-cell {
-      display: flex;
-      gap: 8px;
-    }
-
-    .action-button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 2px;
-      color: var(--primary-color);
-    }
-
-    .action-button:hover {
-      color: var(--primary-hover);
-    }
-
-    .clear-button {
-      font-size: 12px;
-      padding: 4px 8px;
-      color: var(--text-secondary);
-      background: none;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      cursor: pointer;
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-    }
-
-    .clear-button:hover {
-      color: var(--error-color);
-      border-color: var(--error-color);
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 10px 16px;
-      background-color: var(--success-color);
-      color: white;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .setting.switch {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      margin: 8px 0;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    
-    .setting.switch label:first-child {
-      flex: 1;
-      min-width: 120px;
-      max-width: calc(100% - 60px);
-    }
-
-    .switch-wrapper {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 22px;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-
-    .switch-input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .switch-track {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--background-secondary);
-      border: 1px solid var(--border-color);
-      transition: var(--transition);
-      border-radius: 34px;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .switch-thumb {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 3px;
-      bottom: 2px;
-      background-color: var(--text-secondary);
-      transition: var(--transition);
-      border-radius: 50%;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    }
-
-    .switch-input:checked + .switch-track {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-    }
-
-    .switch-input:checked + .switch-track .switch-thumb {
-      transform: translateX(22px);
-      background-color: #ffffff;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Dark mode toggle styles */
-    .dark .switch-track {
-      background-color: var(--background-secondary);
-      border-color: var(--border-color);
-    }
-
-    .dark .switch-thumb {
-      background-color: var(--text-secondary);
-    }
-
-    .dark .switch-input:checked + .switch-track {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-    }
-
-    .dark .switch-input:checked + .switch-track .switch-thumb {
-      background-color: var(--background-primary);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    }
-    
-    /* Hover effects for better UX */
-    .switch-wrapper:hover .switch-track:not(:disabled) {
-      border-color: var(--primary-hover);
-    }
-    
-    /* Fix for long label toggles */
-    .setting.switch.long-label {
-      width: 100%;
-      min-width: 220px;
-      grid-column: span 1;
-    }
-    
-    .setting.switch.long-label label:first-child {
-      font-size: 13px;
-      margin-right: 8px;
-    }
-    
-    /* Add focus styling */
-    .switch-input:focus-visible + .switch-track {
-      box-shadow: var(--focus-ring);
-    }
-    
-    .author-link {
-      color: var(--primary-color);
-      text-decoration: none;
-      transition: var(--transition);
-    }
-    
-    .author-link:hover {
-      color: var(--primary-hover);
-    }
-  </style>
   <link rel="stylesheet" href="options.css" />
 </head>
-<body>
+<body class="dark">
   <div class="container">
     <header>
       <div class="logo">
-        <img id="headerIcon" src="../icons/icon-48.png" alt="CyberKeyGen Logo" data-light-icon="../icons/icon-48.png" data-dark-icon="../icons/icon-48-dark.png">
+        <svg class="brand-shield" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <path d="m9 12 2 2 4-4"></path>
+        </svg>
         <h1>CyberKeyGen</h1>
       </div>
       <div class="theme-toggle">
-        <button id="themeToggle" aria-label="Toggle theme">
-          <svg id="darkIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        <button id="themeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+          <svg id="darkIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
           </svg>
-          <svg id="lightIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          <svg id="lightIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m6.34 17.66-1.41 1.41"></path>
+            <path d="m19.07 4.93-1.41 1.41"></path>
           </svg>
         </button>
       </div>
@@ -547,27 +40,69 @@
     <div class="section">
       <h2>Default Password Settings</h2>
       <div class="settings-grid">
+        <!-- Website-Style Dropdown for Default Tab -->
         <div class="setting">
-          <label for="defaultTab">Default Tab</label>
-          <select id="defaultTab">
-            <option value="random">Random Password</option>
-            <option value="pattern">Pattern Password</option>
-            <option value="pin">PIN</option>
-          </select>
+          <label id="defaultTabLabel">Default Tab</label>
+          <div class="custom-select-wrapper" id="defaultTabWrapper">
+            <!-- Native select for storage/compatibility -->
+            <select id="defaultTab" class="hidden-select" tabindex="-1" aria-hidden="true">
+              <option value="random">Random Password</option>
+              <option value="pattern">From text / Pattern</option>
+              <option value="pin">PIN</option>
+            </select>
+            <!-- Custom Radix-style trigger -->
+            <button type="button" class="custom-select-trigger" id="defaultTabTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="custom-select-value" id="defaultTabValue">Random Password</span>
+              <svg class="custom-select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+            <!-- Custom floating dropdown menu -->
+            <div class="custom-select-dropdown" id="defaultTabDropdown" role="listbox">
+              <div class="custom-select-option selected" data-value="random" role="option" aria-selected="true">
+                <span>Random Password</span>
+                <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div class="custom-select-option" data-value="pattern" role="option" aria-selected="false">
+                <span>From text / Pattern</span>
+                <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div class="custom-select-option" data-value="pin" role="option" aria-selected="false">
+                <span>PIN</span>
+                <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
         
+        <!-- Website-Style Number Stepper for Password Length -->
         <div class="setting">
           <label for="defaultLength">Default Password Length</label>
-          <input type="number" id="defaultLength" min="6" max="52" value="16">
+          <div class="stepper-input-wrapper">
+            <button type="button" class="stepper-btn stepper-dec" data-target="defaultLength" aria-label="Decrease length">−</button>
+            <input type="number" id="defaultLength" min="6" max="128" value="16" class="website-input stepper-input">
+            <button type="button" class="stepper-btn stepper-inc" data-target="defaultLength" aria-label="Increase length">+</button>
+          </div>
         </div>
         
+        <!-- Website-Style Number Stepper for PIN Length -->
         <div class="setting">
           <label for="defaultPinLength">Default PIN Length</label>
-          <input type="number" id="defaultPinLength" min="4" max="12" value="6">
+          <div class="stepper-input-wrapper">
+            <button type="button" class="stepper-btn stepper-dec" data-target="defaultPinLength" aria-label="Decrease PIN length">−</button>
+            <input type="number" id="defaultPinLength" min="4" max="12" value="6" class="website-input stepper-input">
+            <button type="button" class="stepper-btn stepper-inc" data-target="defaultPinLength" aria-label="Increase PIN length">+</button>
+          </div>
         </div>
       </div>
       
-      <div class="settings-grid" style="margin-top: 16px;">
+      <div class="settings-grid" style="margin-top: 20px;">
         <div class="setting switch">
           <label for="defaultIncludeLowercase">Include Lowercase (a-z)</label>
           <label class="switch-wrapper" for="defaultIncludeLowercase">
@@ -608,7 +143,7 @@
           </label>
         </div>
         
-        <div class="setting switch long-label">
+        <div class="setting switch">
           <label for="defaultExcludeAmbiguous">Exclude Ambiguous Characters</label>
           <label class="switch-wrapper" for="defaultExcludeAmbiguous">
             <input type="checkbox" id="defaultExcludeAmbiguous" class="switch-input" />
@@ -628,7 +163,7 @@
           </label>
         </div>
         
-        <div class="setting switch long-label">
+        <div class="setting switch">
           <label for="defaultPronounceable">Generate Pronounceable Passwords</label>
           <label class="switch-wrapper" for="defaultPronounceable">
             <input type="checkbox" id="defaultPronounceable" class="switch-input" />
@@ -641,33 +176,33 @@
     </div>
 
     <div class="button-row" style="margin-bottom: 24px;">
-      <button id="resetButton">Reset to Defaults</button>
-      <button id="saveButton" class="primary">Save Settings</button>
+      <button id="resetButton" type="button">Reset to Defaults</button>
+      <button id="saveButton" type="button" class="primary">Save Settings</button>
     </div>
 
     <div class="section">
       <h2>Keyboard Shortcuts</h2>
-      <p style="margin-bottom: 16px; color: var(--text-secondary);">
-        Configure keyboard shortcuts for quick password generation. To change these shortcuts, visit 
-        chrome://extensions/shortcuts in your browser.
+      <p style="margin-bottom: 16px; color: var(--muted-foreground); font-size: 13px;">
+        Configure keyboard shortcuts for quick password generation. To customize shortcuts, visit 
+        <code>chrome://extensions/shortcuts</code> in your browser.
       </p>
       
       <div class="shortcut-row">
         <span>Generate and fill a password</span>
-        <span class="shortcut-key">Alt+Shift+G <span style="font-size: 11px; opacity: 0.8;">(Win/Linux: Alt+Shift+G, Mac: Option+Shift+G)</span></span>
+        <span class="shortcut-key">Alt+Shift+G <span style="font-size: 11px; opacity: 0.8;">(Mac: Option+Shift+G)</span></span>
       </div>
       
       <div class="shortcut-row">
         <span>Open the password generator popup</span>
-        <span class="shortcut-key">Alt+P <span style="font-size: 11px; opacity: 0.8;">(Win/Linux: Alt+P, Mac: Option+P)</span></span>
+        <span class="shortcut-key">Alt+P <span style="font-size: 11px; opacity: 0.8;">(Mac: Option+P)</span></span>
       </div>
     </div>
 
     <div class="section">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
         <h2 style="margin-bottom: 0;">Password History</h2>
-        <button id="clearHistory" class="clear-button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+        <button id="clearHistory" class="clear-button" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6"></polyline>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
           </svg>
@@ -687,7 +222,7 @@
             </tr>
           </thead>
           <tbody id="historyTableBody">
-            <!-- History entries will be added here dynamically -->
+            <!-- Dynamic history entries -->
           </tbody>
         </table>
       </div>
@@ -707,14 +242,14 @@
             </tr>
           </thead>
           <tbody id="favoritesTableBody">
-            <!-- Favorites entries will be added here dynamically -->
+            <!-- Dynamic favorites entries -->
           </tbody>
         </table>
       </div>
     </div>
 
     <div class="footer-copyright">
-      <p>© 2026 CyberKeyGen • Created by <a href="https://karthiklal.in" id="authorLink" class="author-link" target="_blank">KARTHIK LAL</a></p>
+      <p>© 2026 CyberKeyGen • Created by <a href="https://karthiklal.in" id="authorLink" class="author-link" target="_blank" rel="noopener noreferrer">KARTHIK LAL</a></p>
     </div>
   </div>
 

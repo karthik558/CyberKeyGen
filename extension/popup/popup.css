@@ -118,44 +118,30 @@ body::-webkit-scrollbar-thumb:hover {
 .app-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
+  padding-bottom: 2px;
 }
 
 .brand {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
 }
 
 .eyebrow {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 7px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted-foreground);
+  color: var(--foreground);
 }
 
 .brand-shield {
   color: var(--foreground);
   flex-shrink: 0;
-}
-
-.header-title {
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  color: var(--foreground);
-  line-height: 1.2;
-}
-
-.header-subtitle {
-  font-size: 12px;
-  color: var(--muted-foreground);
-  line-height: 1.35;
 }
 
 .header-actions {
@@ -182,6 +168,12 @@ body::-webkit-scrollbar-thumb:hover {
 .icon-btn:hover {
   background: var(--secondary);
   border-color: var(--foreground);
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .icon-btn:focus-visible {
@@ -501,6 +493,191 @@ body::-webkit-scrollbar-thumb:hover {
   height: 1px;
   background: var(--border);
   width: 100%;
+}
+
+/* ========================================================
+   Website Style Dropdown Design (Shadcn/Radix UI Select)
+   ======================================================== */
+.custom-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.hidden-select {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.custom-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  background-color: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  text-align: left;
+}
+
+.custom-select-trigger:hover {
+  border-color: rgba(128, 128, 128, 0.4);
+}
+
+.custom-select-trigger:focus-visible,
+.custom-select-trigger.open {
+  outline: none;
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 2px var(--ring-color, rgba(255, 255, 255, 0.15));
+}
+
+.custom-select-chevron {
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-select-trigger.open .custom-select-chevron {
+  transform: rotate(180deg);
+}
+
+.custom-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  padding: 4px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.custom-select-dropdown.open {
+  display: flex;
+  animation: dropdownFadeIn 0.15s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.custom-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.custom-select-option:hover {
+  background-color: var(--secondary);
+}
+
+.custom-select-option.selected {
+  background-color: var(--secondary);
+  font-weight: 600;
+}
+
+.custom-select-option .check-icon {
+  color: var(--foreground);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.custom-select-option.selected .check-icon {
+  opacity: 1;
+}
+
+/* ========================================================
+   Website Style Field to Enter (Shadcn/Radix UI Input)
+   ======================================================== */
+.website-input {
+  height: 38px;
+  width: 100%;
+  padding: 0 12px;
+  background-color: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.website-input:hover {
+  border-color: rgba(128, 128, 128, 0.4);
+}
+
+.website-input:focus {
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 2px var(--ring-color, rgba(255, 255, 255, 0.15));
+}
+
+.length-input-container {
+  display: flex;
+  align-items: center;
+}
+
+.length-entry-field {
+  width: 48px;
+  height: 26px;
+  padding: 0 6px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  background-color: var(--secondary);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.length-entry-field:focus {
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 1px var(--foreground);
+}
+
+/* Remove system spin buttons on number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 /* Setting Blocks (Slider) */

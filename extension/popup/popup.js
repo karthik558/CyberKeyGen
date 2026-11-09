@@ -205,21 +205,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  chrome.storage.local.get(['theme'], (result) => {
-    if (result.theme === 'light') {
-      applyTheme(false);
-    } else {
-      // Default to dark theme like website
-      applyTheme(true);
-    }
-  });
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['theme'], (result) => {
+      if (result && result.theme === 'light') {
+        applyTheme(false);
+      } else {
+        applyTheme(true);
+      }
+    });
+  } else {
+    applyTheme(true);
+  }
 
   const themeToggle = document.getElementById('themeToggle');
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
       const isDarkNow = document.body.classList.contains('dark');
       applyTheme(!isDarkNow);
-      chrome.storage.local.set({ theme: !isDarkNow ? 'dark' : 'light' });
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ theme: !isDarkNow ? 'dark' : 'light' });
+      }
     });
   }
 
@@ -244,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Auto generate on tab switch if empty
-      if (tabId === 'pin' && !pinOutput.value) {
+      if (tabId === 'pin' && pinOutput && !pinOutput.value && generatePinBtn) {
         generatePinBtn.click();
       }
     });
@@ -293,9 +298,139 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Password length slider
+  // Website-style custom dropdown (Radix/Shadcn UI listbox)
+  const initCustomSelects = () => {
+    document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+      const trigger = wrapper.querySelector('.custom-select-trigger');
+      const dropdown = wrapper.querySelector('.custom-select-dropdown');
+      const nativeSelect = wrapper.querySelector('select');
+      const valueDisplay = wrapper.querySelector('.custom-select-value');
+      const options = wrapper.querySelectorAll('.custom-select-option');
+
+      if (!trigger || !dropdown || !nativeSelect) return;
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = dropdown.classList.contains('open');
+        closeAllDropdowns();
+        if (!isOpen) {
+          dropdown.classList.add('open');
+          trigger.classList.add('open');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+
+      options.forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const val = opt.getAttribute('data-value');
+          const text = opt.querySelector('span')?.textContent || opt.textContent.trim();
+
+          nativeSelect.value = val;
+          nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+          if (valueDisplay) valueDisplay.textContent = text;
+
+          options.forEach(o => {
+            o.classList.toggle('selected', o === opt);
+            o.setAttribute('aria-selected', o === opt ? 'true' : 'false');
+          });
+
+          dropdown.classList.remove('open');
+          trigger.classList.remove('open');
+          trigger.setAttribute('aria-expanded', 'false');
+        });
+      });
+    });
+
+    document.addEventListener('click', closeAllDropdowns);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAllDropdowns();
+    });
+  };
+
+  const closeAllDropdowns = () => {
+    document.querySelectorAll('.custom-select-dropdown.open').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.custom-select-trigger.open').forEach(t => {
+      t.classList.remove('open');
+      t.setAttribute('aria-expanded', 'false');
+    });
+  };
+
+  const updateCustomSelectUI = (wrapperId, val) => {
+    const wrapper = document.getElementById(wrapperId);
+    if (!wrapper) return;
+    const opt = wrapper.querySelector(`.custom-select-option[data-value="${val}"]`);
+    const valueDisplay = wrapper.querySelector('.custom-select-value');
+    const options = wrapper.querySelectorAll('.custom-select-option');
+
+    if (opt) {
+      const text = opt.querySelector('span')?.textContent || opt.textContent.trim();
+      if (valueDisplay) valueDisplay.textContent = text;
+      options.forEach(o => {
+        o.classList.toggle('selected', o === opt);
+        o.setAttribute('aria-selected', o === opt ? 'true' : 'false');
+      });
+    }
+  };
+
+  initCustomSelects();
+
+  // Preset Selection handling
+  const presetSelect = document.getElementById('presetSelect');
+  if (presetSelect) {
+    presetSelect.addEventListener('change', () => {
+      const val = presetSelect.value;
+      const lowercase = document.getElementById('includeLowercase');
+      const uppercase = document.getElementById('includeUppercase');
+      const numbers = document.getElementById('includeNumbers');
+      const symbols = document.getElementById('includeSymbols');
+      const pronounceable = document.getElementById('pronounceable');
+      const ambiguous = document.getElementById('excludeAmbiguous');
+      const repeating = document.getElementById('avoidRepeating');
+
+      if (val === 'all') {
+        if (lowercase) lowercase.checked = true;
+        if (uppercase) uppercase.checked = true;
+        if (numbers) numbers.checked = true;
+        if (symbols) symbols.checked = true;
+        if (pronounceable) pronounceable.checked = false;
+        if (ambiguous) ambiguous.checked = false;
+        if (repeating) repeating.checked = false;
+      } else if (val === 'alphanumeric') {
+        if (lowercase) lowercase.checked = true;
+        if (uppercase) uppercase.checked = true;
+        if (numbers) numbers.checked = true;
+        if (symbols) symbols.checked = false;
+        if (pronounceable) pronounceable.checked = false;
+      } else if (val === 'letters') {
+        if (lowercase) lowercase.checked = true;
+        if (uppercase) uppercase.checked = true;
+        if (numbers) numbers.checked = false;
+        if (symbols) symbols.checked = false;
+        if (pronounceable) pronounceable.checked = false;
+      } else if (val === 'numbers') {
+        if (lowercase) lowercase.checked = false;
+        if (uppercase) uppercase.checked = false;
+        if (numbers) numbers.checked = true;
+        if (symbols) symbols.checked = false;
+        if (pronounceable) pronounceable.checked = false;
+      } else if (val === 'pronounceable') {
+        if (pronounceable) pronounceable.checked = true;
+        if (lowercase) lowercase.checked = true;
+        if (uppercase) uppercase.checked = true;
+        if (numbers) numbers.checked = true;
+        if (symbols) symbols.checked = true;
+      }
+      updateCustomSelectUI('presetSelectWrapper', val);
+      generateNewPassword();
+    });
+  }
+
+  // Password length slider and direct number input
   const passwordLength = document.getElementById('passwordLength');
   const lengthValue = document.getElementById('lengthValue');
+  const lengthInput = document.getElementById('lengthInput');
   const passwordHint = document.getElementById('passwordHint');
 
   const updateQuickLengths = (len) => {
@@ -304,40 +439,73 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  if (passwordLength && lengthValue) {
+  if (passwordLength) {
     updateRangeProgress(passwordLength);
     passwordLength.addEventListener('input', () => {
       const len = parseInt(passwordLength.value);
-      lengthValue.textContent = len;
+      if (lengthValue) lengthValue.textContent = len;
+      if (lengthInput) lengthInput.value = len;
       updateRangeProgress(passwordLength);
       updateQuickLengths(len);
       generateNewPassword();
     });
   }
 
-  document.querySelectorAll('.quick-len-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const len = parseInt(btn.dataset.len);
+  if (lengthInput && passwordLength) {
+    const handleLengthInputChange = () => {
+      let len = parseInt(lengthInput.value);
+      if (isNaN(len)) return;
+      len = Math.max(8, Math.min(128, len));
+      lengthInput.value = len;
       passwordLength.value = len;
-      lengthValue.textContent = len;
+      if (lengthValue) lengthValue.textContent = len;
       updateRangeProgress(passwordLength);
       updateQuickLengths(len);
       generateNewPassword();
+    };
+
+    lengthInput.addEventListener('input', () => {
+      let len = parseInt(lengthInput.value);
+      if (!isNaN(len) && len >= 8 && len <= 128) {
+        passwordLength.value = len;
+        if (lengthValue) lengthValue.textContent = len;
+        updateRangeProgress(passwordLength);
+        updateQuickLengths(len);
+        generateNewPassword();
+      }
+    });
+
+    lengthInput.addEventListener('change', handleLengthInputChange);
+    lengthInput.addEventListener('blur', handleLengthInputChange);
+  }
+
+  document.querySelectorAll('.quick-len-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const len = parseInt(btn.dataset.len);
+      if (passwordLength) {
+        passwordLength.value = len;
+        if (lengthValue) lengthValue.textContent = len;
+        if (lengthInput) lengthInput.value = len;
+        updateRangeProgress(passwordLength);
+        updateQuickLengths(len);
+        generateNewPassword();
+      }
     });
   });
 
   // Password generation
   const generatePasswordBtn = document.getElementById('generatePassword');
   const generateNewPassword = () => {
+    if (!passwordLength) return "";
     const options = {
       length: parseInt(passwordLength.value),
-      includeLowercase: document.getElementById('includeLowercase').checked,
-      includeUppercase: document.getElementById('includeUppercase').checked,
-      includeNumbers: document.getElementById('includeNumbers').checked,
-      includeSymbols: document.getElementById('includeSymbols').checked,
-      excludeAmbiguous: document.getElementById('excludeAmbiguous').checked,
-      avoidRepeating: document.getElementById('avoidRepeating').checked,
-      usePronounceable: document.getElementById('pronounceable').checked
+      includeLowercase: document.getElementById('includeLowercase')?.checked ?? true,
+      includeUppercase: document.getElementById('includeUppercase')?.checked ?? true,
+      includeNumbers: document.getElementById('includeNumbers')?.checked ?? true,
+      includeSymbols: document.getElementById('includeSymbols')?.checked ?? true,
+      excludeAmbiguous: document.getElementById('excludeAmbiguous')?.checked ?? false,
+      avoidRepeating: document.getElementById('avoidRepeating')?.checked ?? false,
+      usePronounceable: document.getElementById('pronounceable')?.checked ?? false
     };
     
     const newPassword = generateRandomPassword(options);
@@ -369,23 +537,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener('change', () => {
-        // Prevent all checkboxes from being unchecked
         const lowercase = document.getElementById('includeLowercase');
         const uppercase = document.getElementById('includeUppercase');
         const numbers = document.getElementById('includeNumbers');
         const symbols = document.getElementById('includeSymbols');
-        if (!lowercase.checked && !uppercase.checked && !numbers.checked && !symbols.checked) {
-          el.checked = true;
-          return;
+        if (lowercase && uppercase && numbers && symbols) {
+          if (!lowercase.checked && !uppercase.checked && !numbers.checked && !symbols.checked) {
+            el.checked = true;
+            return;
+          }
+        }
+        // Mark preset as Custom when checkboxes are manually adjusted
+        if (presetSelect) {
+          presetSelect.value = 'custom';
+          updateCustomSelectUI('presetSelectWrapper', 'custom');
         }
         generateNewPassword();
       });
     }
   });
 
-  // PIN controls
+  // PIN controls and direct number input
   const pinLength = document.getElementById('pinLength');
   const pinLengthValue = document.getElementById('pinLengthValue');
+  const pinLengthInput = document.getElementById('pinLengthInput');
   const pinOutput = document.getElementById('pinOutput');
   const pinHint = document.getElementById('pinHint');
   const generatePinBtn = document.getElementById('generatePin');
@@ -396,32 +571,64 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  if (pinLength && pinLengthValue) {
+  if (pinLength) {
     updateRangeProgress(pinLength);
     pinLength.addEventListener('input', () => {
       const len = parseInt(pinLength.value);
-      pinLengthValue.textContent = len;
+      if (pinLengthValue) pinLengthValue.textContent = len;
+      if (pinLengthInput) pinLengthInput.value = len;
       updateRangeProgress(pinLength);
       updateQuickPinLengths(len);
       if (generatePinBtn) generatePinBtn.click();
     });
   }
 
-  document.querySelectorAll('.quick-pin-len-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const len = parseInt(btn.dataset.len);
+  if (pinLengthInput && pinLength) {
+    const handlePinLengthChange = () => {
+      let len = parseInt(pinLengthInput.value);
+      if (isNaN(len)) return;
+      len = Math.max(4, Math.min(12, len));
+      pinLengthInput.value = len;
       pinLength.value = len;
-      pinLengthValue.textContent = len;
+      if (pinLengthValue) pinLengthValue.textContent = len;
       updateRangeProgress(pinLength);
       updateQuickPinLengths(len);
       if (generatePinBtn) generatePinBtn.click();
+    };
+
+    pinLengthInput.addEventListener('input', () => {
+      let len = parseInt(pinLengthInput.value);
+      if (!isNaN(len) && len >= 4 && len <= 12) {
+        pinLength.value = len;
+        if (pinLengthValue) pinLengthValue.textContent = len;
+        updateRangeProgress(pinLength);
+        updateQuickPinLengths(len);
+        if (generatePinBtn) generatePinBtn.click();
+      }
+    });
+
+    pinLengthInput.addEventListener('change', handlePinLengthChange);
+    pinLengthInput.addEventListener('blur', handlePinLengthChange);
+  }
+
+  document.querySelectorAll('.quick-pin-len-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const len = parseInt(btn.dataset.len);
+      if (pinLength) {
+        pinLength.value = len;
+        if (pinLengthValue) pinLengthValue.textContent = len;
+        if (pinLengthInput) pinLengthInput.value = len;
+        updateRangeProgress(pinLength);
+        updateQuickPinLengths(len);
+        if (generatePinBtn) generatePinBtn.click();
+      }
     });
   });
 
   if (generatePinBtn) {
     generatePinBtn.addEventListener('click', () => {
-      const length = parseInt(pinLength.value);
-      const avoidRepeatingPin = document.getElementById('avoidRepeatingPin').checked;
+      const length = parseInt(pinLength?.value || '6');
+      const avoidRepeatingPin = document.getElementById('avoidRepeatingPin')?.checked ?? false;
       
       const newPin = generatePin(length, avoidRepeatingPin);
       if (pinOutput) pinOutput.value = newPin;
@@ -495,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyPasswordBtn = document.getElementById('copyPassword');
   if (copyPasswordBtn) {
     copyPasswordBtn.addEventListener('click', () => {
-      if (!passwordOutput.value) return;
+      if (!passwordOutput || !passwordOutput.value) return;
       navigator.clipboard.writeText(passwordOutput.value).then(() => {
         showCopySuccess(copyPasswordBtn);
       });
@@ -505,7 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyLeetBtn = document.getElementById('copyLeet');
   if (copyLeetBtn) {
     copyLeetBtn.addEventListener('click', () => {
-      if (!leetOutput.value) return;
+      if (!leetOutput || !leetOutput.value) return;
       navigator.clipboard.writeText(leetOutput.value).then(() => {
         showCopySuccess(copyLeetBtn);
       });
@@ -515,7 +722,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyPinBtn = document.getElementById('copyPin');
   if (copyPinBtn) {
     copyPinBtn.addEventListener('click', () => {
-      if (!pinOutput.value) return;
+      if (!pinOutput || !pinOutput.value) return;
       navigator.clipboard.writeText(pinOutput.value).then(() => {
         showCopySuccess(copyPinBtn);
       });
@@ -526,48 +733,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const fillPasswordBtn = document.getElementById('fillPassword');
   if (fillPasswordBtn) {
     fillPasswordBtn.addEventListener('click', () => {
-      if (!passwordOutput.value) return;
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs && tabs[0]) {
-          chrome.tabs.sendMessage(tabs[0].id, { 
-            action: 'fillPassword', 
-            password: passwordOutput.value 
-          });
-          window.close();
-        }
-      });
+      if (!passwordOutput || !passwordOutput.value) return;
+      if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs && tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, { 
+              action: 'fillPassword', 
+              password: passwordOutput.value 
+            });
+            window.close();
+          }
+        });
+      }
     });
   }
 
   const fillLeetBtn = document.getElementById('fillLeet');
   if (fillLeetBtn) {
     fillLeetBtn.addEventListener('click', () => {
-      if (!leetOutput.value) return;
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs && tabs[0]) {
-          chrome.tabs.sendMessage(tabs[0].id, { 
-            action: 'fillPassword', 
-            password: leetOutput.value 
-          });
-          window.close();
-        }
-      });
+      if (!leetOutput || !leetOutput.value) return;
+      if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs && tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, { 
+              action: 'fillPassword', 
+              password: leetOutput.value 
+            });
+            window.close();
+          }
+        });
+      }
     });
   }
 
   const fillPinBtn = document.getElementById('fillPin');
   if (fillPinBtn) {
     fillPinBtn.addEventListener('click', () => {
-      if (!pinOutput.value) return;
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs && tabs[0]) {
-          chrome.tabs.sendMessage(tabs[0].id, { 
-            action: 'fillPassword', 
-            password: pinOutput.value 
-          });
-          window.close();
-        }
-      });
+      if (!pinOutput || !pinOutput.value) return;
+      if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs && tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, { 
+              action: 'fillPassword', 
+              password: pinOutput.value 
+            });
+            window.close();
+          }
+        });
+      }
     });
   }
 
@@ -575,7 +788,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const openOptionsBtn = document.getElementById('openOptions');
   if (openOptionsBtn) {
     openOptionsBtn.addEventListener('click', () => {
-      chrome.runtime.openOptionsPage();
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.openOptionsPage) {
+        chrome.runtime.openOptionsPage();
+      } else {
+        window.open('../options/options.html', '_blank');
+      }
     });
   }
 
@@ -584,7 +801,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (webLink) {
     webLink.addEventListener('click', (e) => {
       e.preventDefault();
-      chrome.tabs.create({ url: 'https://password.karthiklal.in/' });
+      if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.create) {
+        chrome.tabs.create({ url: 'https://password.karthiklal.in/' });
+      } else {
+        window.open('https://password.karthiklal.in/', '_blank');
+      }
     });
   }
 
@@ -592,15 +813,20 @@ document.addEventListener('DOMContentLoaded', () => {
   if (authorLink) {
     authorLink.addEventListener('click', (e) => {
       e.preventDefault();
-      chrome.tabs.create({ url: 'https://karthiklal.in/' });
+      if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.create) {
+        chrome.tabs.create({ url: 'https://karthiklal.in/' });
+      } else {
+        window.open('https://karthiklal.in/', '_blank');
+      }
     });
   }
 
   // History storage
   function savePasswordToHistory(pwd, type) {
     if (!pwd) return;
+    if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) return;
     chrome.storage.local.get(['passwordHistory'], (result) => {
-      const history = result.passwordHistory || [];
+      const history = (result && result.passwordHistory) || [];
       const newEntry = {
         password: pwd,
         timestamp: new Date().toISOString(),
@@ -616,51 +842,64 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Load saved options defaults if present
-  chrome.storage.local.get(['settings'], (result) => {
-    if (result.settings) {
-      const settings = result.settings;
-      if (settings.defaultTab) {
-        const tabButton = document.querySelector(`.tab-button[data-tab="${settings.defaultTab}"]`);
-        if (tabButton) tabButton.click();
-      }
-      if (settings.defaultLength && passwordLength) {
-        passwordLength.value = settings.defaultLength;
-        lengthValue.textContent = settings.defaultLength;
-        updateRangeProgress(passwordLength);
-        updateQuickLengths(settings.defaultLength);
-      }
-      if (settings.defaultPinLength && pinLength) {
-        pinLength.value = settings.defaultPinLength;
-        pinLengthValue.textContent = settings.defaultPinLength;
-        updateRangeProgress(pinLength);
-        updateQuickPinLengths(settings.defaultPinLength);
-      }
-      if (settings.hasOwnProperty('defaultIncludeLowercase')) {
-        document.getElementById('includeLowercase').checked = settings.defaultIncludeLowercase;
-      }
-      if (settings.hasOwnProperty('defaultIncludeUppercase')) {
-        document.getElementById('includeUppercase').checked = settings.defaultIncludeUppercase;
-      }
-      if (settings.hasOwnProperty('defaultIncludeNumbers')) {
-        document.getElementById('includeNumbers').checked = settings.defaultIncludeNumbers;
-      }
-      if (settings.hasOwnProperty('defaultIncludeSymbols')) {
-        document.getElementById('includeSymbols').checked = settings.defaultIncludeSymbols;
-      }
-      if (settings.hasOwnProperty('defaultExcludeAmbiguous')) {
-        document.getElementById('excludeAmbiguous').checked = settings.defaultExcludeAmbiguous;
-      }
-      if (settings.hasOwnProperty('defaultAvoidRepeating')) {
-        document.getElementById('avoidRepeating').checked = settings.defaultAvoidRepeating;
-        document.getElementById('avoidRepeatingPin').checked = settings.defaultAvoidRepeating;
-      }
-      if (settings.hasOwnProperty('defaultPronounceable')) {
-        document.getElementById('pronounceable').checked = settings.defaultPronounceable;
-      }
-    }
+  // Initial password generation immediately
+  generateNewPassword();
 
-    // Initial password generation
-    generateNewPassword();
-  });
+  // Load saved options defaults if present
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['settings'], (result) => {
+      if (result && result.settings) {
+        const settings = result.settings;
+        if (settings.defaultTab) {
+          const tabButton = document.querySelector(`.tab-button[data-tab="${settings.defaultTab}"]`);
+          if (tabButton) tabButton.click();
+        }
+        if (settings.defaultLength && passwordLength) {
+          passwordLength.value = settings.defaultLength;
+          if (lengthValue) lengthValue.textContent = settings.defaultLength;
+          if (lengthInput) lengthInput.value = settings.defaultLength;
+          updateRangeProgress(passwordLength);
+          updateQuickLengths(settings.defaultLength);
+        }
+        if (settings.defaultPinLength && pinLength) {
+          pinLength.value = settings.defaultPinLength;
+          if (pinLengthValue) pinLengthValue.textContent = settings.defaultPinLength;
+          if (pinLengthInput) pinLengthInput.value = settings.defaultPinLength;
+          updateRangeProgress(pinLength);
+          updateQuickPinLengths(settings.defaultPinLength);
+        }
+        if (settings.hasOwnProperty('defaultIncludeLowercase')) {
+          const el = document.getElementById('includeLowercase');
+          if (el) el.checked = settings.defaultIncludeLowercase;
+        }
+        if (settings.hasOwnProperty('defaultIncludeUppercase')) {
+          const el = document.getElementById('includeUppercase');
+          if (el) el.checked = settings.defaultIncludeUppercase;
+        }
+        if (settings.hasOwnProperty('defaultIncludeNumbers')) {
+          const el = document.getElementById('includeNumbers');
+          if (el) el.checked = settings.defaultIncludeNumbers;
+        }
+        if (settings.hasOwnProperty('defaultIncludeSymbols')) {
+          const el = document.getElementById('includeSymbols');
+          if (el) el.checked = settings.defaultIncludeSymbols;
+        }
+        if (settings.hasOwnProperty('defaultExcludeAmbiguous')) {
+          const el = document.getElementById('excludeAmbiguous');
+          if (el) el.checked = settings.defaultExcludeAmbiguous;
+        }
+        if (settings.hasOwnProperty('defaultAvoidRepeating')) {
+          const el = document.getElementById('avoidRepeating');
+          if (el) el.checked = settings.defaultAvoidRepeating;
+          const elPin = document.getElementById('avoidRepeatingPin');
+          if (elPin) elPin.checked = settings.defaultAvoidRepeating;
+        }
+        if (settings.hasOwnProperty('defaultPronounceable')) {
+          const el = document.getElementById('pronounceable');
+          if (el) el.checked = settings.defaultPronounceable;
+        }
+        generateNewPassword();
+      }
+    });
+  }
 });

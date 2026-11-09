@@ -13,14 +13,12 @@
     <header class="app-header">
       <div class="brand">
         <div class="eyebrow">
-          <svg class="brand-shield" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="brand-shield" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             <path d="m9 12 2 2 4-4"></path>
           </svg>
-          <span>CyberKeyGen</span>
+          <span class="brand-name">CyberKeyGen</span>
         </div>
-        <h1 class="header-title">Strong passwords. Zero fuss.</h1>
-        <p class="header-subtitle">Your next password starts here. Create, customize, and copy in seconds.</p>
       </div>
       <div class="header-actions">
         <button id="openOptions" class="icon-btn" aria-label="Settings" title="Extension Settings">
@@ -30,19 +28,19 @@
           </svg>
         </button>
         <button id="themeToggle" class="icon-btn" aria-label="Toggle theme" title="Toggle theme">
-          <svg id="darkIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          <svg id="darkIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
           </svg>
-          <svg id="lightIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          <svg id="lightIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m6.34 17.66-1.41 1.41"></path>
+            <path d="m19.07 4.93-1.41 1.41"></path>
           </svg>
         </button>
       </div>
@@ -121,11 +119,73 @@
           <span class="customize-subtitle">Set your preferences, then generate.</span>
         </div>
 
-        <!-- Password Length Slider -->
+        <!-- Website-Style Preset Dropdown -->
+        <div class="setting-block">
+          <label id="presetSelectLabel" class="setting-title">Character Preset</label>
+          <div class="custom-select-wrapper" id="presetSelectWrapper">
+            <select id="presetSelect" class="hidden-select" tabindex="-1" aria-hidden="true">
+              <option value="all">All Characters (Standard)</option>
+              <option value="alphanumeric">Letters & Numbers</option>
+              <option value="letters">Letters Only</option>
+              <option value="numbers">Numbers Only</option>
+              <option value="pronounceable">Easy to Pronounce</option>
+              <option value="custom">Custom</option>
+            </select>
+            <button type="button" class="custom-select-trigger" id="presetSelectTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="custom-select-value" id="presetSelectValue">All Characters (Standard)</span>
+              <svg class="custom-select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+            <div class="custom-select-dropdown" id="presetSelectDropdown" role="listbox">
+              <div class="custom-select-option selected" data-value="all" role="option" aria-selected="true">
+                <span>All Characters (Standard)</span>
+                <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div class="custom-select-option" data-value="alphanumeric" role="option" aria-selected="false">
+                <span>Letters & Numbers</span>
+                <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div class="custom-select-option" data-value="letters" role="option" aria-selected="false">
+                <span>Letters Only</span>
+                <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div class="custom-select-option" data-value="numbers" role="option" aria-selected="false">
+                <span>Numbers Only</span>
+                <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div class="custom-select-option" data-value="pronounceable" role="option" aria-selected="false">
+                <span>Easy to Pronounce</span>
+                <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div class="custom-select-option" data-value="custom" role="option" aria-selected="false">
+                <span>Custom</span>
+                <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Password Length Slider with Website-Style Direct Number Input -->
         <div class="setting-block">
           <div class="slider-header">
             <label for="passwordLength" class="setting-title">Password Length</label>
-            <span class="badge-mono" id="lengthValue">16</span>
+            <div class="length-input-container">
+              <input type="number" id="lengthInput" class="website-input length-entry-field" min="8" max="128" value="16" aria-label="Enter password length" />
+              <span class="badge-mono" id="lengthValue" style="display: none;">16</span>
+            </div>
           </div>
           <div class="slider-container">
             <input type="range" id="passwordLength" min="8" max="128" value="16" />
@@ -226,7 +286,7 @@
     <div id="pattern" class="tab-content" role="tabpanel">
       <div class="input-card">
         <label for="baseText" class="setting-title">Your starting word or phrase</label>
-        <input type="text" id="baseText" class="text-input" placeholder="e.g. a quiet morning" />
+        <input type="text" id="baseText" class="website-input text-input" placeholder="e.g. a quiet morning" />
         <p class="input-subtext">We'll mix your text with random characters.</p>
       </div>
 
@@ -307,7 +367,10 @@
         <div class="setting-block">
           <div class="slider-header">
             <label for="pinLength" class="setting-title">PIN Length</label>
-            <span class="badge-mono" id="pinLengthValue">6</span>
+            <div class="length-input-container">
+              <input type="number" id="pinLengthInput" class="website-input length-entry-field" min="4" max="12" value="6" aria-label="Enter PIN length" />
+              <span class="badge-mono" id="pinLengthValue" style="display: none;">6</span>
+            </div>
           </div>
           <div class="slider-container">
             <input type="range" id="pinLength" min="4" max="12" value="6" />
