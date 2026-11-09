@@ -1,18 +1,20 @@
 
 import React from "react";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetTrigger 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetClose,
+  SheetTrigger
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { 
-  ClipboardCopy, 
-  BookmarkCheck, 
-  Trash2, 
-  Eye, 
+import {
+  ClipboardCopy,
+  BookmarkCheck,
+  Trash2,
+  Eye,
   EyeOff,
   X,
   CheckIcon,
@@ -52,10 +54,10 @@ const PasswordFavorites: React.FC<PasswordFavoritesProps> = ({
 
   const getStrengthColor = (strength: string) => {
     switch (strength) {
-      case "weak": return "bg-zinc-300 dark:bg-zinc-700";
-      case "moderate": return "bg-zinc-500";
-      case "strong": return "bg-zinc-800 dark:bg-zinc-300";
-      case "very-strong": return "bg-zinc-950 dark:bg-zinc-50";
+      case "weak": return "bg-foreground/35";
+      case "moderate": return "bg-foreground/50";
+      case "strong": return "bg-foreground/75";
+      case "very-strong": return "bg-foreground";
       default: return "bg-zinc-200 dark:bg-zinc-800";
     }
   };
@@ -63,8 +65,9 @@ const PasswordFavorites: React.FC<PasswordFavoritesProps> = ({
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="relative h-9 w-9 border-border/50 hover:bg-secondary/60">
+        <Button variant="outline" size="sm" className="relative" aria-label="Open saved passwords">
           <BookmarkCheck className="h-4 w-4" />
+          <span>Saved</span>
           {favorites.length > 0 && (
             <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold px-1 animate-pulse">
               {favorites.length}
@@ -72,15 +75,16 @@ const PasswordFavorites: React.FC<PasswordFavoritesProps> = ({
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto bg-background/95 backdrop-blur-md border-l border-border/40 text-foreground">
+      <SheetContent className="password-library text-foreground" showCloseButton={false}>
         <SheetHeader className="mb-4 border-b border-border/20 pb-3">
-          <SheetTitle className="flex justify-between items-center text-lg font-bold">
-            <span>Favorite Passwords</span>
-            <div className="flex space-x-1.5 z-10">
+          <div className="library-heading">
+            <SheetTitle>Saved passwords</SheetTitle>
+            <div className="library-actions">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowPasswords(!showPasswords)}
+                aria-label={showPasswords ? "Hide passwords" : "Show passwords"}
                 className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-secondary/40"
               >
                 {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -90,18 +94,27 @@ const PasswordFavorites: React.FC<PasswordFavoritesProps> = ({
                   variant="destructive"
                   size="sm"
                   onClick={onClearFavorites}
+                  aria-label="Clear saved passwords"
                   className="h-8 w-8 p-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               )}
+              <SheetClose asChild>
+                <Button variant="outline" size="icon" aria-label="Close">
+                  <X className="h-4 w-4" />
+                </Button>
+              </SheetClose>
             </div>
-          </SheetTitle>
+          </div>
+          <SheetDescription className="text-left text-xs">Kept in this tab only. Reloading clears this list.</SheetDescription>
         </SheetHeader>
 
         {favorites.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 font-mono text-xs text-muted-foreground">
-            [ NO_FAVORITE_RECORDS ]
+            <BookmarkCheck className="mb-4 h-8 w-8" aria-hidden="true" />
+            <p className="text-sm font-medium text-foreground">Keep the ones you need</p>
+            <p className="mt-2 text-center font-sans">Save a generated password to find it here.</p>
           </div>
         ) : (
           <div className="space-y-3.5">
@@ -125,6 +138,9 @@ const PasswordFavorites: React.FC<PasswordFavoritesProps> = ({
                       {item.type}
                     </span>
                   </div>
+                </div>
+                <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary" role="progressbar" aria-label={`${item.strength.replace("-", " ")} password strength`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={item.strength === "weak" ? 25 : item.strength === "moderate" ? 50 : item.strength === "strong" ? 75 : 100}>
+                  <div className={`h-full ${getStrengthColor(item.strength)}`} style={{ width: item.strength === "weak" ? "25%" : item.strength === "moderate" ? "50%" : item.strength === "strong" ? "75%" : "100%" }} />
                 </div>
                 <div className="font-mono bg-secondary border border-border/80 rounded-lg p-2.5 mb-2 overflow-x-auto select-all">
                   {showPasswords ? (
@@ -157,6 +173,7 @@ const PasswordFavorites: React.FC<PasswordFavoritesProps> = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => handleCopy(item.password, index)}
+                      aria-label="Copy password"
                       className="h-7 px-2 hover:bg-secondary/40"
                     >
                       {copiedIndex === index ? (
@@ -169,6 +186,7 @@ const PasswordFavorites: React.FC<PasswordFavoritesProps> = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => onRemoveFromFavorites(index)}
+                      aria-label="Remove saved password"
                       className="h-7 px-2 hover:bg-secondary/40 text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-3.5 w-3.5" />

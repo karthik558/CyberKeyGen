@@ -1,68 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { Key } from "lucide-react";
+import { useEffect } from "react";
+import { KeyRound, Loader2 } from "lucide-react";
 
-const Preloader = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingText, setLoadingText] = useState("INITIALIZING SECURITY CORE...");
-  const [percent, setPercent] = useState(0);
-
+const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   useEffect(() => {
-    // Phase texts
-    const statuses = [
-      "ESTABLISHING ENCRYPTION LAYER...",
-      "GENERATING ENTROPY POOL...",
-      "MOUNTING CRYPTO ENGINE...",
-      "READY."
-    ];
-
-    let statusIdx = 0;
-    const textInterval = setInterval(() => {
-      if (statusIdx < statuses.length) {
-        setLoadingText(statuses[statusIdx]);
-        statusIdx++;
-      }
-    }, 400);
-
-    const percentInterval = setInterval(() => {
-      setPercent((prev) => {
-        if (prev >= 100) {
-          clearInterval(percentInterval);
-          return 100;
-        }
-        return prev + Math.floor(Math.random() * 15) + 5;
-      });
-    }, 100);
-
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1600); // slightly longer to feel like a real security system boot
-
+    const finish = () => onComplete();
+    // Do not let slow assets indefinitely block access to the generator.
+    const fallback = window.setTimeout(finish, 2500);
+    let frame: number | undefined;
+    if (document.readyState === "complete") {
+      frame = window.requestAnimationFrame(finish);
+    } else {
+      window.addEventListener("load", finish, { once: true });
+    }
     return () => {
-      clearInterval(textInterval);
-      clearInterval(percentInterval);
-      clearTimeout(timer);
+      window.clearTimeout(fallback);
+      if (frame !== undefined) window.cancelAnimationFrame(frame);
+      window.removeEventListener("load", finish);
     };
-  }, []);
-
-  if (!isLoading) return null;
+  }, [onComplete]);
 
   return (
-    <div className="soft-loader">
-      <div className="flex flex-col items-center gap-4">
-        {/* Animated logo wrapper */}
-        <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-secondary border border-border/80 p-3 shadow-md animate-pulse">
-          <img 
-            src="/favicon.png" 
-            alt="CyberKeyGen Logo Light" 
-            className="w-10 h-10 transition-transform duration-300 animate-spin [animation-duration:10s] hidden dark:block" 
-          />
-          <img 
-            src="/favicon-dark.png" 
-            alt="CyberKeyGen Logo Dark" 
-            className="w-10 h-10 transition-transform duration-300 animate-spin [animation-duration:10s] block dark:hidden" 
-          />
-        </div>
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-5 bg-background text-foreground" role="status" aria-live="polite">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-card">
+        <KeyRound className="h-7 w-7" aria-hidden="true" />
       </div>
+      <div className="text-center">
+        <p className="text-lg font-semibold tracking-tight">CyberKeyGen</p>
+        <p className="mt-1 text-sm text-muted-foreground">Opening your password workspace</p>
+      </div>
+      <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none text-muted-foreground" aria-hidden="true" />
     </div>
   );
 };

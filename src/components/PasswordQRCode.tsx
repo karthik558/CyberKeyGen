@@ -36,6 +36,8 @@ const PasswordQRCode = ({ password }: PasswordQRCodeProps) => {
           variant="outline"
           size="icon"
           title="Create QR Code"
+          aria-label="Create QR code"
+          disabled={!password}
           onClick={handleClick}
           className="h-9 w-9"
         >

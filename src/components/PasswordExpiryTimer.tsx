@@ -79,6 +79,8 @@ const PasswordExpiryTimer = ({ password, onPasswordExpiry }: PasswordExpiryTimer
           variant="outline" 
           size="icon" 
           title="Set Expiry Timer"
+          aria-label="Set expiry timer"
+          disabled={!password}
           className="h-9 w-9 relative"
         >
           <Clock className="h-4 w-4" />

@@ -11,9 +11,9 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <SonnerToaster 
-        position="top-right" 
-        closeButton 
+      <SonnerToaster
+        position="bottom-center"
+        closeButton
         theme="system"
         toastOptions={{
           classNames: {

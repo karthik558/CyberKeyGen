@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import ResponsiveIconButton from "@/components/ResponsiveIconButton";
 import {
   Dialog,
   DialogContent,
@@ -104,13 +103,14 @@ const PasswordExportImport: React.FC<PasswordExportImportProps> = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <ResponsiveIconButton 
+        <Button
           variant="outline" 
           size="sm" 
-          icon={<FileJson className="h-4 w-4" />}
-          text="Export/Import" 
-          className="h-9"
-        />
+          aria-label="Backup: export or import passwords"
+        >
+          <FileJson className="h-4 w-4" />
+          <span>Backup</span>
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

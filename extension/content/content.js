@@ -1,3 +1,9 @@
+// Let the CyberKeyGen website hide its install promotion. No privileged API is exposed.
+if (location.origin === 'https://password.karthiklal.in' ||
+    (location.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(location.hostname))) {
+  document.documentElement.setAttribute('data-cyberkeygen-extension', 'installed');
+}
+
 // Content script for CyberShield Password Generator
 // This script handles filling passwords into form fields
 

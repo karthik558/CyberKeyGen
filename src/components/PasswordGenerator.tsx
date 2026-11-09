@@ -4,27 +4,25 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-import { 
-  CheckIcon, 
-  ClipboardCopy, 
-  Eye, 
-  EyeOff, 
+import {
+  CheckIcon,
+  ClipboardCopy,
+  Eye,
+  EyeOff,
   RefreshCw,
   ChevronDown,
   Info,
   ShieldCheck,
   Heart,
-  Pin
 } from "lucide-react";
 import { toast } from "sonner";
-import { convertToLeetSpeak, createMixedPassword } from "@/utils/leetSpeakConverter";
+import { createMixedPassword } from "@/utils/leetSpeakConverter";
 import { generatePronounceablePassword } from "@/utils/pronounceableGenerator";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import PasswordHistory from "./PasswordHistory";
 import PasswordFavorites from "./PasswordFavorites";
 import PasswordCategories from "./PasswordCategories";
@@ -54,7 +52,7 @@ interface PinSettings {
   avoidRepeating: boolean;
 }
 
-const PasswordGenerator = () => {
+const PasswordGenerator = ({ headerActions }: { headerActions?: React.ReactNode }) => {
   const [settings, setSettings] = useState<PasswordSettings>({
     length: 16,
     includeLowercase: true,
@@ -74,16 +72,14 @@ const PasswordGenerator = () => {
 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(true);
+  const [customizeOpen, setCustomizeOpen] = useState(false);
   const [securityTipsOpen, setSecurityTipsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState<"weak" | "moderate" | "strong" | "very-strong">("strong");
-  
+
   const [baseText, setBaseText] = useState("");
   const [leetPassword, setLeetPassword] = useState("");
   const [activeTab, setActiveTab] = useState("random");
   const [pin, setPin] = useState("");
-  const [scramblePassword, setScramblePassword] = useState("");
-  const [isScrambling, setIsScrambling] = useState(false);
   const { gap } = useResponsiveGap();
   const isMobile = useIsMobile();
 
@@ -111,54 +107,43 @@ const PasswordGenerator = () => {
   const symbolChars = "!@#$%^&*()-_=+";
   const ambiguousChars = "iIl1Lo0O";
 
-  const calculatePasswordStrength = (pwd: string) => {
+  const calculatePasswordStrength = (pwd: string): "weak" | "moderate" | "strong" | "very-strong" => {
     if (!pwd) return "weak";
-    
+
     const length = pwd.length;
     let typesCount = 0;
-    
+
     if (/[a-z]/.test(pwd)) typesCount++;
     if (/[A-Z]/.test(pwd)) typesCount++;
     if (/[0-9]/.test(pwd)) typesCount++;
     if (/[^a-zA-Z0-9]/.test(pwd)) typesCount++;
-    
+
     if (length < 8) return "weak";
     if (length < 12) return typesCount >= 3 ? "moderate" : "weak";
     if (length < 16) return typesCount >= 3 ? "strong" : "moderate";
     return typesCount >= 3 ? "very-strong" : "strong";
   };
 
-  const getPasswordStrengthColor = () => {
-    switch (passwordStrength) {
-      case "weak": return "bg-zinc-300 dark:bg-zinc-700";
-      case "moderate": return "bg-zinc-500";
-      case "strong": return "bg-zinc-800 dark:bg-zinc-300";
-      case "very-strong": return "bg-zinc-950 dark:bg-zinc-50";
+  const getPasswordStrengthColor = (strength: string) => {
+    switch (strength) {
+      case "weak": return "bg-foreground/35";
+      case "moderate": return "bg-foreground/50";
+      case "strong": return "bg-foreground/75";
+      case "very-strong": return "bg-foreground";
       default: return "bg-zinc-200 dark:bg-zinc-800";
     }
   };
 
-  const runScrambleAnimation = (finalValue: string, isNumeric = false, callback: (val: string) => void) => {
-    setIsScrambling(true);
-    let count = 0;
-    const maxScrambles = 10;
-    const chars = isNumeric ? "0123456789" : lowercaseChars + uppercaseChars + numberChars + symbolChars;
-    
-    const interval = setInterval(() => {
-      let temp = "";
-      for (let i = 0; i < finalValue.length; i++) {
-        temp += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      setScramblePassword(temp);
-      count++;
-      
-      if (count >= maxScrambles) {
-        clearInterval(interval);
-        setScramblePassword("");
-        setIsScrambling(false);
-        callback(finalValue);
-      }
-    }, 25);
+  const applyGeneratedValue = (finalValue: string, callback: (val: string) => void) => {
+    callback(finalValue);
+    setCopied(false);
+    setPasswordHistory(previous => [{
+      password: finalValue,
+      timestamp: new Date(),
+      strength: calculatePasswordStrength(finalValue),
+      type: activeTab as "random" | "leet" | "pin",
+      category: selectedCategory || "uncategorized",
+    }, ...previous.filter(item => item.password !== finalValue)].slice(0, 100));
   };
 
   const generateRandomPassword = () => {
@@ -170,17 +155,13 @@ const PasswordGenerator = () => {
           settings.includeNumbers,
           settings.includeSymbols
         );
-        
-        const strength = calculatePasswordStrength(pronounceablePassword);
-        setPasswordStrength(strength);
-        
-        runScrambleAnimation(pronounceablePassword, false, (final) => {
+
+        applyGeneratedValue(pronounceablePassword, (final) => {
           setPassword(final);
-          toast.success("Pronounceable password generated successfully!");
         });
         return;
       }
-      
+
       if (
         !settings.includeLowercase &&
         !settings.includeUppercase &&
@@ -225,39 +206,39 @@ const PasswordGenerator = () => {
 
       if (settings.requireAllTypes && mustIncludeChars.length > 0) {
         result = mustIncludeChars.join("");
-        
+
         for (let i = result.length; i < length; i++) {
           const nextChar = availableChars.charAt(Math.floor(Math.random() * availableChars.length));
-          
+
           if (settings.avoidRepeating && result.includes(nextChar)) {
             let attemptCount = 0;
             let uniqueChar = nextChar;
-            
+
             while (result.includes(uniqueChar) && attemptCount < 10) {
               uniqueChar = availableChars.charAt(Math.floor(Math.random() * availableChars.length));
               attemptCount++;
             }
-            
+
             result += uniqueChar;
           } else {
             result += nextChar;
           }
         }
-        
+
         result = result.split("").sort(() => 0.5 - Math.random()).join("");
       } else {
         for (let i = 0; i < length; i++) {
           const nextChar = availableChars.charAt(Math.floor(Math.random() * availableChars.length));
-          
+
           if (settings.avoidRepeating && result.includes(nextChar)) {
             let attemptCount = 0;
             let uniqueChar = nextChar;
-            
+
             while (result.includes(uniqueChar) && attemptCount < 10) {
               uniqueChar = availableChars.charAt(Math.floor(Math.random() * availableChars.length));
               attemptCount++;
             }
-            
+
             result += uniqueChar;
           } else {
             result += nextChar;
@@ -265,12 +246,8 @@ const PasswordGenerator = () => {
         }
       }
 
-      const strength = calculatePasswordStrength(result);
-      setPasswordStrength(strength);
-      
-      runScrambleAnimation(result, false, (final) => {
+      applyGeneratedValue(result, (final) => {
         setPassword(final);
-        toast.success("Password generated successfully!");
       });
     } catch (error) {
       console.error("Password generation error:", error);
@@ -283,7 +260,7 @@ const PasswordGenerator = () => {
       toast.error("Please enter some text first");
       return;
     }
-    
+
     const mixedPassword = createMixedPassword(
       baseText,
       settings.length,
@@ -293,13 +270,9 @@ const PasswordGenerator = () => {
       settings.includeSymbols,
       settings.excludeAmbiguous
     );
-    
-    const strength = calculatePasswordStrength(mixedPassword);
-    setPasswordStrength(strength);
-    
-    runScrambleAnimation(mixedPassword, false, (final) => {
+
+    applyGeneratedValue(mixedPassword, (final) => {
       setLeetPassword(final);
-      toast.success("Password created successfully!");
     });
   };
 
@@ -307,31 +280,27 @@ const PasswordGenerator = () => {
     try {
       const length = pinSettings.length;
       let result = "";
-      
+
       for (let i = 0; i < length; i++) {
         const nextDigit = Math.floor(Math.random() * 10).toString();
-        
+
         if (pinSettings.avoidRepeating && result.includes(nextDigit)) {
           let attemptCount = 0;
           let uniqueDigit = nextDigit;
-          
+
           while (result.includes(uniqueDigit) && attemptCount < 10) {
             uniqueDigit = Math.floor(Math.random() * 10).toString();
             attemptCount++;
           }
-          
+
           result += uniqueDigit;
         } else {
           result += nextDigit;
         }
       }
-      
-      const strength = length < 6 ? "weak" : length < 8 ? "moderate" : "strong";
-      setPasswordStrength(strength);
-      
-      runScrambleAnimation(result, true, (final) => {
+
+      applyGeneratedValue(result, (final) => {
         setPin(final);
-        toast.success("PIN generated successfully!");
       });
     } catch (error) {
       console.error("PIN generation error:", error);
@@ -340,19 +309,19 @@ const PasswordGenerator = () => {
   };
 
   const copyToClipboard = () => {
-    let textToCopy = activeTab === "random" ? password : 
+    const textToCopy = activeTab === "random" ? password :
                     activeTab === "leet" ? leetPassword : pin;
-    
+
     if (!textToCopy) {
       toast.error("Generate a password first!");
       return;
     }
-    
+
     navigator.clipboard.writeText(textToCopy).then(
       () => {
         setCopied(true);
         toast.success("Password copied to clipboard!");
-        
+
         setTimeout(() => {
           setCopied(false);
         }, 2000);
@@ -392,7 +361,7 @@ const PasswordGenerator = () => {
       },
       ...prev
     ]);
-    
+
     toast.success("Added to favorites");
   };
 
@@ -401,10 +370,10 @@ const PasswordGenerator = () => {
     toast.success("Removed from favorites");
   };
 
-  const handleImportPasswords = (importedPasswords: Array<any>) => {
+  const handleImportPasswords = (importedPasswords: typeof passwordHistory) => {
     const existingPasswords = new Set(passwordHistory.map(p => p.password));
     const newPasswords = importedPasswords.filter(p => !existingPasswords.has(p.password));
-    
+
     setPasswordHistory(prev => [
       ...newPasswords,
       ...prev
@@ -412,9 +381,9 @@ const PasswordGenerator = () => {
   };
 
   const addCurrentPasswordToFavorites = () => {
-    const currentPassword = activeTab === "random" ? password : 
+    const currentPassword = activeTab === "random" ? password :
                            activeTab === "leet" ? leetPassword : pin;
-    
+
     if (!currentPassword) {
       toast.error("Generate a password first!");
       return;
@@ -423,16 +392,16 @@ const PasswordGenerator = () => {
     addToFavorites({
       password: currentPassword,
       timestamp: new Date(),
-      strength: passwordStrength,
+      strength: calculatePasswordStrength(currentPassword),
       type: activeTab as "random" | "leet" | "pin",
       category: selectedCategory || "uncategorized"
     });
   };
 
   const saveToHistory = () => {
-    const currentPassword = activeTab === "random" ? password : 
+    const currentPassword = activeTab === "random" ? password :
                            activeTab === "leet" ? leetPassword : pin;
-    
+
     if (!currentPassword) {
       toast.error("Generate a password first!");
       return;
@@ -442,13 +411,13 @@ const PasswordGenerator = () => {
       {
         password: currentPassword,
         timestamp: new Date(),
-        strength: passwordStrength,
+        strength: calculatePasswordStrength(currentPassword),
         type: activeTab as "random" | "leet" | "pin",
         category: selectedCategory || "uncategorized"
       },
-      ...prev.slice(0, 19)
+      ...prev.filter(item => item.password !== currentPassword).slice(0, 99)
     ]);
-    
+
     toast.success("Added to history");
   };
 
@@ -515,30 +484,27 @@ const PasswordGenerator = () => {
 
   const { isListening, toggleListening } = useKeyboardShortcuts(shortcuts);
 
-  useEffect(() => {
-    // Empty useEffect to avoid automatic password generation
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => { setCopied(false); }, [activeTab]);
 
   const formatConsolePassword = (pwd: string, placeholderText: string) => {
-    const displayValue = isScrambling ? scramblePassword : pwd;
-    
+    const displayValue = pwd;
+
     if (!displayValue) {
       return (
-        <span className="text-muted-foreground/50 font-sans text-sm sm:text-base">
+        <span className="text-muted-foreground font-sans text-sm sm:text-base">
           {placeholderText}
         </span>
       );
     }
-    
-    if (!showPassword && !isScrambling) {
+
+    if (!showPassword) {
       return (
         <span className="tracking-widest font-mono text-lg sm:text-xl text-primary/80 select-none">
           {"•".repeat(displayValue.length)}
         </span>
       );
     }
-    
+
     return (
       <span className="font-mono text-lg sm:text-xl break-all">
         {displayValue.split("").map((char, index) => {
@@ -551,54 +517,58 @@ const PasswordGenerator = () => {
     );
   };
 
-  const currentPassword = activeTab === "random" ? password : 
+  const currentPassword = activeTab === "random" ? password :
                          activeTab === "leet" ? leetPassword : pin;
+  const currentStrength = calculatePasswordStrength(currentPassword);
+  const strengthScore = !currentPassword ? 0 : currentStrength === "weak" ? 25 : currentStrength === "moderate" ? 50 : currentStrength === "strong" ? 75 : 100;
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <Card className="bg-card border border-border/80 shadow-lg rounded-2xl relative overflow-hidden">
-        <CardHeader className="space-y-1.5 border-b border-border/60 pb-4 pt-6">
-          <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-center relative flex items-center justify-center">
-            <ShieldCheck className="w-6 h-6 mr-2.5 text-primary" />
-            <span>Generate Secure Password</span>
-          </CardTitle>
-          <p className="text-center text-muted-foreground text-xs sm:text-sm">
-            Create strong, cryptographic passwords or PINs instantly
-          </p>
+    <div className="generator-shell w-full max-w-7xl mx-auto">
+      <Card className="bg-card border border-border rounded-xl relative overflow-hidden">
+        <CardHeader className="generator-header border-b border-border">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              <ShieldCheck className="w-4 h-4" />
+              <span className="generator-eyebrow">CyberKeyGen</span>
+            </div>
+            {headerActions}
+          </div>
+          <h1 className="generator-title font-semibold">Strong passwords. Zero fuss.</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Your next password starts here. Create, customize, and copy in seconds.</p>
         </CardHeader>
-        
-        <CardContent className="space-y-6 pt-6">
-          <Tabs 
-            defaultValue="random" 
-            className="w-full"
+
+        <CardContent className="generator-body space-y-6">
+          <Tabs
+            defaultValue="random"
+            className="generator-workspace"
             onValueChange={(value) => setActiveTab(value)}
             value={activeTab}
           >
-            <TabsPrimitive.List className="segmented-tabs-list mb-6">
-              <TabsPrimitive.Trigger 
-                value="random" 
+            <TabsPrimitive.List className="segmented-tabs-list">
+              <TabsPrimitive.Trigger
+                value="random"
                 className="segmented-tab-trigger"
               >
-                Random Password
+                Random
               </TabsPrimitive.Trigger>
-              <TabsPrimitive.Trigger 
-                value="leet" 
+              <TabsPrimitive.Trigger
+                value="leet"
                 className="segmented-tab-trigger"
               >
-                Text to Password
+                From text
               </TabsPrimitive.Trigger>
-              <TabsPrimitive.Trigger 
-                value="pin" 
+              <TabsPrimitive.Trigger
+                value="pin"
                 className="segmented-tab-trigger"
               >
-                PIN Generator
+                PIN
               </TabsPrimitive.Trigger>
             </TabsPrimitive.List>
-            
-            <div className="w-full">
-              <div className="flex items-center justify-between mb-4 bg-secondary/35 p-2 rounded-xl border border-border/40">
+
+            <div className="generator-preview">
+              <nav className="generator-toolbar" aria-label="Password tools">
                 <div className={`flex items-center ${gap}`}>
-                  <PasswordHistory 
+                  <PasswordHistory
                     history={passwordHistory}
                     onClearHistory={clearHistory}
                     onCopyPassword={(pwd) => {
@@ -625,270 +595,97 @@ const PasswordGenerator = () => {
                 </div>
                 <div className={`flex items-center ${gap}`}>
                   {!isMobile && (
-                    <KeyboardShortcuts 
+                    <KeyboardShortcuts
                       shortcuts={shortcuts}
                       isEnabled={isListening}
                       onToggle={toggleListening}
                     />
                   )}
-                  <PasswordExportImport 
+                  <PasswordExportImport
                     passwordHistory={passwordHistory}
                     onImport={handleImportPasswords}
                   />
                 </div>
-              </div>
-              
-              {activeTab === "random" ? (
-                <div className="relative mb-5">
-                  <div className="premium-display-card flex items-center justify-between gap-3 min-h-[56px]">
-                    <div className="flex-1 select-all select-text overflow-x-auto whitespace-nowrap scrollbar-none flex items-center px-1">
-                      {formatConsolePassword(password, "Click 'Generate' to create a password")}
-                    </div>
-                    <div className="flex items-center gap-1 z-10">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg transition-colors"
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={copyToClipboard}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg transition-colors"
-                      >
-                        {copied ? <CheckIcon className="h-4 w-4 text-foreground animate-scaleIn" /> : <ClipboardCopy className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center mt-3 bg-secondary/15 p-2 rounded-xl border border-border/40">
-                    <div className={`flex ${gap}`}>
-                      <PasswordCategories 
-                        onSelectCategory={setSelectedCategory}
-                        selectedCategory={selectedCategory}
-                      />
-                      <PasswordQRCode password={password} />
-                      <PasswordExpiryTimer 
-                        password={password}
-                        onPasswordExpiry={handlePasswordExpiry} 
-                      />
-                    </div>
-                    <div className={`flex ${gap}`}>
-                      <Button
-                        variant="outline"
-                        onClick={addCurrentPasswordToFavorites}
-                        className={`${isMobile ? "w-9 h-9 p-0" : "h-9 font-semibold hover:bg-secondary/80 border-border/60"}`}
-                        size="sm"
-                      >
-                        <Heart className={`h-4 w-4 ${!isMobile && "mr-2"}`} />
-                        {!isMobile && "Save"}
-                      </Button>
-                      <Button
-                        onClick={generateRandomPassword}
-                        className={`${isMobile ? "w-9 h-9 p-0" : "h-9 font-semibold"}`}
-                        size="sm"
-                      >
-                        <RefreshCw className={`h-4 w-4 ${!isMobile && "mr-2"} ${isScrambling && activeTab === "random" ? "animate-spin" : ""}`} />
-                        {!isMobile && "Generate"}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ) : activeTab === "leet" ? (
-                <div className="space-y-4 mb-5">
-                  <div className="flex gap-2 items-end">
-                    <div className="flex-1">
-                      <Label htmlFor="base-text" className="text-xs font-semibold mb-1.5 block text-muted-foreground">Enter text to convert</Label>
-                      <Input
-                        id="base-text"
-                        placeholder="Enter a word or phrase"
-                        value={baseText}
-                        onChange={(e) => setBaseText(e.target.value)}
-                        className="h-10 border-border/60 focus-visible:ring-primary bg-secondary/20"
-                      />
-                    </div>
-                    <Button
-                      onClick={generateLeetPassword}
-                      className={`h-10 font-semibold ${isMobile ? "w-10 h-10 p-0" : "h-10"}`}
-                    >
-                      <RefreshCw className={`h-4 w-4 ${!isMobile && "mr-2"} ${isScrambling && activeTab === "leet" ? "animate-spin" : ""}`} />
-                      {!isMobile && "Generate"}
-                    </Button>
-                  </div>
-                  
-                  {leetPassword && (
-                    <div>
-                      <div className="premium-display-card flex items-center justify-between gap-3 min-h-[56px]">
-                        <div className="flex-1 select-all select-text overflow-x-auto whitespace-nowrap scrollbar-none flex items-center px-1">
-                          {formatConsolePassword(leetPassword, "")}
-                        </div>
-                        <div className="flex items-center gap-1 z-10">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg transition-colors"
-                          >
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={copyToClipboard}
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg transition-colors"
-                          >
-                            {copied ? <CheckIcon className="h-4 w-4 text-foreground" /> : <ClipboardCopy className="h-4 w-4" />}
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-between items-center mt-3 bg-secondary/15 p-2 rounded-xl border border-border/40">
-                        <div className={`flex ${gap}`}>
-                          <PasswordCategories 
-                            onSelectCategory={setSelectedCategory}
-                            selectedCategory={selectedCategory}
-                          />
-                          <PasswordQRCode password={leetPassword} />
-                          <PasswordExpiryTimer 
-                            password={leetPassword}
-                            onPasswordExpiry={handlePasswordExpiry} 
-                          />
-                        </div>
-                        <div className={`flex ${gap}`}>
-                          <Button
-                            variant="outline"
-                            onClick={addCurrentPasswordToFavorites}
-                            className={`${isMobile ? "w-9 h-9 p-0" : "h-9 font-semibold hover:bg-secondary/80 border-border/60"}`}
-                            size="sm"
-                          >
-                            <Heart className={`h-4 w-4 ${!isMobile && "mr-2"}`} />
-                            {!isMobile && "Save"}
-                          </Button>
-                          <Button
-                            onClick={generateLeetPassword}
-                            className={`${isMobile ? "w-9 h-9 p-0" : "h-9 font-semibold"}`}
-                            size="sm"
-                          >
-                            <RefreshCw className={`h-4 w-4 ${!isMobile && "mr-2"} ${isScrambling && activeTab === "leet" ? "animate-spin" : ""}`} />
-                            {!isMobile && "Regenerate"}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-4 mb-5">
-                  <div className="relative">
-                    <div className="premium-display-card flex flex-col items-center gap-3">
-                      <div className="w-full flex items-center justify-center min-h-[48px]">
-                        {pin || (isScrambling && activeTab === "pin") ? (
-                          <div className="flex flex-wrap justify-center gap-1.5 max-w-full overflow-hidden select-none">
-                            {(isScrambling ? scramblePassword : pin).split('').map((digit, index) => (
-                              <div
-                                key={index}
-                                className="h-11 w-9 flex items-center justify-center relative font-mono"
-                              >
-                                <div className="absolute inset-0 bg-secondary/80 rounded-lg border border-border/80 shadow-sm" />
-                                <span className="relative text-lg font-bold text-foreground z-10">
-                                  {showPassword || isScrambling ? digit : '•'}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="py-3 px-2">
-                            <p className="text-muted-foreground/60 text-center text-sm">
-                              Generate a PIN to see it displayed here
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center justify-between w-full border-t border-border/40 pt-2 px-1 z-10">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={copyToClipboard}
-                          className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                        >
-                          {copied ? <CheckIcon className="h-4 w-4 text-foreground" /> : <ClipboardCopy className="h-4 w-4" />}
-                        </Button>
-                        <span className="text-[10px] font-mono text-muted-foreground/60 tracking-wider">PIN_SECURE_LOCK</span>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                        >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-center mt-3 bg-secondary/15 p-2 rounded-xl border border-border/40">
-                      <div className={`flex ${gap}`}>
-                        <PasswordCategories 
-                          onSelectCategory={setSelectedCategory}
-                          selectedCategory={selectedCategory}
-                        />
-                        <PasswordQRCode password={pin} />
-                        <PasswordExpiryTimer 
-                          password={pin}
-                          onPasswordExpiry={handlePasswordExpiry} 
-                        />
-                      </div>
-                      <div className={`flex ${gap}`}>
-                        <Button
-                          variant="outline"
-                          onClick={addCurrentPasswordToFavorites}
-                          className={`${isMobile ? "w-9 h-9 p-0" : "h-9 font-semibold hover:bg-secondary/80 border-border/60"}`}
-                          size="sm"
-                        >
-                          <Heart className={`h-4 w-4 ${!isMobile && "mr-2"}`} />
-                          {!isMobile && "Save"}
-                        </Button>
-                        <Button
-                          onClick={generatePin}
-                          className={`${isMobile ? "w-9 h-9 p-0" : "h-9 font-semibold"}`}
-                          size="sm"
-                        >
-                          <RefreshCw className={`h-4 w-4 ${!isMobile && "mr-2"} ${isScrambling && activeTab === "pin" ? "animate-spin" : ""}`} />
-                          {!isMobile && "Generate"}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+              </nav>
+
+              {activeTab === "leet" && (
+                <div className="space-y-2 mb-5">
+                  <Label htmlFor="base-text">Your starting word or phrase</Label>
+                  <Input id="base-text" placeholder="e.g. a quiet morning" value={baseText}
+                    onChange={(event) => setBaseText(event.target.value)}
+                    onKeyDown={(event) => { if (event.key === "Enter") generateLeetPassword(); }} />
+                  <p className="text-xs text-muted-foreground">We’ll mix your text with random characters.</p>
                 </div>
               )}
-              
-              <div className="mb-2 bg-secondary/15 p-3 rounded-xl border border-border/40">
+              <div className="premium-display-card">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">{activeTab === "pin" ? "Your PIN" : "Your password"}</span>
+                  <Button variant="ghost" size="icon" aria-label={showPassword ? "Hide password" : "Show password"}
+                    disabled={!currentPassword} onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <div className="password-value" aria-label="Generated result">
+                  {formatConsolePassword(currentPassword, "Ready when you are.")}
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground" role="status">
+                  {currentPassword ? `${currentPassword.length} ${activeTab === "pin" ? "digits" : "characters"} · Generated in your browser` : "Choose your settings, then hit Generate."}
+                </p>
+              </div>
+              <div className="primary-actions">
+                <Button onClick={activeTab === "random" ? generateRandomPassword : activeTab === "leet" ? generateLeetPassword : generatePin}
+                  disabled={activeTab === "leet" && !baseText.trim()} aria-label={activeTab === "pin" ? "Generate PIN" : "Generate password"}>
+                  <RefreshCw className="h-4 w-4" /> Generate{currentPassword ? " again" : ""}
+                </Button>
+                <Button variant="outline" onClick={copyToClipboard} disabled={!currentPassword}>
+                  {copied ? <CheckIcon className="h-4 w-4" /> : <ClipboardCopy className="h-4 w-4" />}
+                  {copied ? "Copied" : "Copy"}
+                </Button>
+              </div>
+              <div className="generator-actions">
+                <div>
+                  <PasswordCategories onSelectCategory={setSelectedCategory} selectedCategory={selectedCategory} />
+                  <PasswordQRCode password={currentPassword} />
+                  <PasswordExpiryTimer key={`${activeTab}-${currentPassword}`} password={currentPassword} onPasswordExpiry={handlePasswordExpiry} />
+                </div>
+                <Button variant="ghost" disabled={!currentPassword} onClick={addCurrentPasswordToFavorites}>
+                  <Heart className="h-4 w-4" /> Save
+                </Button>
+              </div>
+              <div className="generator-strength">
                 <div className="flex justify-between text-xs font-mono mb-2">
-                  <span className="text-muted-foreground">PASSWORD_STRENGTH</span>
+                  <span className="text-muted-foreground">Password strength</span>
                   <span className={`capitalize font-bold ${
-                    passwordStrength === "weak" ? "text-foreground/40" :
-                    passwordStrength === "moderate" ? "text-foreground/70" :
+                    !currentPassword ? "text-muted-foreground" :
+                    currentStrength === "weak" ? "text-foreground" :
+                    currentStrength === "moderate" ? "text-foreground" :
                     "text-foreground"
                   }`}>
-                    {passwordStrength.replace("-", " ")}
+                    {currentPassword ? currentStrength.replace("-", " ") : "Not rated"}
                   </span>
                 </div>
-                <div className="h-2 w-full bg-secondary/60 rounded-full overflow-hidden border border-border/40 p-0.5">
-                  <div 
-                    className={`h-full rounded-full transition-all duration-500 ${getPasswordStrengthColor()}`}
-                    style={{ 
-                      width: passwordStrength === "weak" ? "25%" : 
-                             passwordStrength === "moderate" ? "50%" : 
-                             passwordStrength === "strong" ? "75%" : "100%" 
-                    }}
+                <div className="h-3 w-full bg-secondary rounded-full overflow-hidden border" role="progressbar" aria-label="Password strength" aria-valuemin={0} aria-valuemax={100} aria-valuenow={strengthScore} aria-valuetext={currentPassword ? currentStrength.replace("-", " ") : "Not rated"}>
+                  <div
+                    className={`h-full rounded-full transition-[width,background-color] duration-300 ${getPasswordStrengthColor(currentStrength)}`}
+                    style={{ width: `${strengthScore}%` }}
                   ></div>
                 </div>
               </div>
+              <p className="mt-4 text-xs text-muted-foreground">History and saved passwords stay in this tab and clear when you reload.</p>
             </div>
-            
+
+            <Collapsible className="generator-customize" open={!isMobile || customizeOpen} onOpenChange={setCustomizeOpen}>
+              <div className="hidden md:block mb-4">
+                <h2 className="text-base font-semibold">Customize {activeTab === "pin" ? "PIN" : "password"}</h2>
+                <p className="text-xs text-muted-foreground mt-1">Set your preferences, then generate.</p>
+              </div>
+              <CollapsibleTrigger asChild className="md:hidden">
+                <Button variant="ghost" className="customize-trigger">
+                  <span>Customize {activeTab === "pin" ? "PIN" : "password"}</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${customizeOpen ? "rotate-180" : ""}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="customize-content">
             <TabsContent value="random" className="space-y-4 mt-0">
               <div className="space-y-2">
                 <div className="flex justify-between">
@@ -903,11 +700,20 @@ const PasswordGenerator = () => {
                   value={[settings.length]}
                   onValueChange={(value) => setSettings({ ...settings, length: value[0] })}
                   className="py-2"
+                  aria-label="Password length"
                 />
               </div>
-              
+
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2" aria-label="Quick password lengths">
+                {[12, 16, 24, 32, 48, 64].map(length => (
+                  <Button key={length} variant={settings.length === length ? "default" : "outline"} size="sm"
+                    aria-pressed={settings.length === length} onClick={() => setSettings({ ...settings, length })}>
+                    {length} <span className="sr-only">characters</span>
+                  </Button>
+                ))}
+              </div>
               <Separator className="my-4" />
-              
+
               <div className="space-y-3">
                 <h3 className="text-sm font-medium">Character Types</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -919,7 +725,7 @@ const PasswordGenerator = () => {
                       onCheckedChange={(checked) => setSettings({ ...settings, includeLowercase: checked })}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between space-x-2">
                     <Label htmlFor="uppercase" className="text-xs">Uppercase (A-Z)</Label>
                     <Switch
@@ -928,7 +734,7 @@ const PasswordGenerator = () => {
                       onCheckedChange={(checked) => setSettings({ ...settings, includeUppercase: checked })}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between space-x-2">
                     <Label htmlFor="numbers" className="text-xs">Numbers (0-9)</Label>
                     <Switch
@@ -937,7 +743,7 @@ const PasswordGenerator = () => {
                       onCheckedChange={(checked) => setSettings({ ...settings, includeNumbers: checked })}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between space-x-2">
                     <Label htmlFor="symbols" className="text-xs">Symbols (!@#$%^&*)</Label>
                     <Switch
@@ -946,7 +752,7 @@ const PasswordGenerator = () => {
                       onCheckedChange={(checked) => setSettings({ ...settings, includeSymbols: checked })}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between space-x-2">
                     <Label htmlFor="ambiguous" className="text-xs">Exclude Ambiguous (iIl1Lo0O)</Label>
                     <Switch
@@ -955,7 +761,7 @@ const PasswordGenerator = () => {
                       onCheckedChange={(checked) => setSettings({ ...settings, excludeAmbiguous: checked })}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between space-x-2">
                     <Label htmlFor="pronounceable" className="text-xs">Pronounceable Password</Label>
                     <Switch
@@ -966,9 +772,9 @@ const PasswordGenerator = () => {
                   </div>
                 </div>
               </div>
-              
+
               <Separator className="my-4" />
-              
+
               <div className="space-y-3">
                 <h3 className="text-sm font-medium">Advanced Options</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -981,7 +787,7 @@ const PasswordGenerator = () => {
                       disabled={settings.usePronounceable}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between space-x-2">
                     <Label htmlFor="avoid-repeating" className="text-xs">Avoid Repeating Characters</Label>
                     <Switch
@@ -994,14 +800,13 @@ const PasswordGenerator = () => {
                 </div>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="leet" className="space-y-4 mt-0">
               <div className="space-y-4">
                 <p className="text-xs text-muted-foreground">
-                  Enter a memorable word or phrase that will be converted to a secure password. 
-                  We'll mix it with random characters to reach your desired length.
+                  A familiar phrase makes a memorable starting point. Random passwords are a better choice for sensitive accounts.
                 </p>
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <Label htmlFor="leet-password-length" className="text-xs font-medium">Password Length</Label>
@@ -1009,6 +814,7 @@ const PasswordGenerator = () => {
                   </div>
                   <Slider
                     id="leet-password-length"
+                    aria-label="Text password length"
                     min={8}
                     max={128}
                     step={1}
@@ -1017,9 +823,9 @@ const PasswordGenerator = () => {
                     className="py-2"
                   />
                 </div>
-                
+
                 <Separator className="my-4" />
-                
+
                 <div className="space-y-3">
                   <h3 className="text-sm font-medium">Character Types (for random part)</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1031,7 +837,7 @@ const PasswordGenerator = () => {
                         onCheckedChange={(checked) => setSettings({ ...settings, includeLowercase: checked })}
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between space-x-2">
                       <Label htmlFor="leet-uppercase" className="text-xs">Uppercase (A-Z)</Label>
                       <Switch
@@ -1040,7 +846,7 @@ const PasswordGenerator = () => {
                         onCheckedChange={(checked) => setSettings({ ...settings, includeUppercase: checked })}
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between space-x-2">
                       <Label htmlFor="leet-numbers" className="text-xs">Numbers (0-9)</Label>
                       <Switch
@@ -1049,7 +855,7 @@ const PasswordGenerator = () => {
                         onCheckedChange={(checked) => setSettings({ ...settings, includeNumbers: checked })}
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between space-x-2">
                       <Label htmlFor="leet-symbols" className="text-xs">Symbols (!@#$%^&*)</Label>
                       <Switch
@@ -1058,7 +864,7 @@ const PasswordGenerator = () => {
                         onCheckedChange={(checked) => setSettings({ ...settings, includeSymbols: checked })}
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between space-x-2">
                       <Label htmlFor="leet-ambiguous" className="text-xs">Exclude Ambiguous (iIl1Lo0O)</Label>
                       <Switch
@@ -1071,13 +877,13 @@ const PasswordGenerator = () => {
                 </div>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="pin" className="space-y-4 mt-0">
               <div className="space-y-4">
                 <p className="text-xs text-muted-foreground">
                   Generate a secure PIN code with your desired length. Great for device unlock codes, ATM PINs, and other numeric access needs.
                 </p>
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <Label htmlFor="pin-length" className="text-xs font-medium">PIN Length</Label>
@@ -1085,6 +891,7 @@ const PasswordGenerator = () => {
                   </div>
                   <Slider
                     id="pin-length"
+                    aria-label="PIN length"
                     min={4}
                     max={12}
                     step={1}
@@ -1093,9 +900,9 @@ const PasswordGenerator = () => {
                     className="py-2"
                   />
                 </div>
-                
+
                 <Separator className="my-4" />
-                
+
                 <div className="space-y-3">
                   <h3 className="text-sm font-medium">PIN Options</h3>
                   <div className="grid grid-cols-1 gap-3">
@@ -1111,19 +918,21 @@ const PasswordGenerator = () => {
                 </div>
               </div>
             </TabsContent>
+              </CollapsibleContent>
+            </Collapsible>
           </Tabs>
-          
+
           <Separator />
-          
+
           <Collapsible
             open={securityTipsOpen}
             onOpenChange={setSecurityTipsOpen}
-            className="space-y-2 bg-secondary/10 hover:bg-secondary/20 transition-colors border border-border/20 rounded-lg p-4"
+            className="security-tips space-y-2 bg-secondary/10 hover:bg-secondary/20 transition-colors border border-border/20 rounded-lg p-4"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Info className="h-4 w-4 text-primary animate-pulse" />
-                <h3 className="font-semibold text-sm tracking-wide text-foreground/90">PASSWORD SECURITY TIPS</h3>
+                <Info className="h-4 w-4 text-primary" />
+                <h3 className="font-medium text-sm text-foreground/90">Password security tips</h3>
               </div>
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm" className="w-8 h-8 p-0 rounded-full hover:bg-secondary/40">

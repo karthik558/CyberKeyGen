@@ -1,0 +1,26 @@
+/* Shared monochrome language with the generator and extension popup. */
+:root { --radius: 8px; --text-secondary: #666; --transition: background-color 150ms ease, border-color 150ms ease; }
+.dark { --text-secondary: #adadad; }
+body { padding: 40px 24px; }
+.container { max-width: 880px; }
+header { gap: 16px; padding-bottom: 24px; margin-bottom: 32px; }
+.logo { flex-wrap: wrap; }
+.logo h1 { font-size: 28px; letter-spacing: -0.04em; }
+.logo .subtitle { border-radius: 6px; border: 1px solid var(--border-color); margin-left: 0; }
+.section { border: 1px solid var(--border-color); background: var(--background-primary); padding: 28px; border-radius: 12px; }
+h2 { font-size: 20px; letter-spacing: -0.02em; font-weight: 600; }
+.settings-grid { gap: 24px; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); }
+button, select, input[type="number"], input[type="text"] { min-height: 44px; border-radius: 8px; }
+.theme-toggle button { width: 44px; border: 1px solid var(--border-color); border-radius: 8px; }
+input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; }
+.setting-row { gap: 12px; padding: 12px 0; }
+.setting-row .setting-label { min-width: 0; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 3px; }
+@media (max-width: 480px) {
+  body { padding: 20px 12px; }
+  .section { padding: 20px 16px; }
+  .logo h1 { font-size: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

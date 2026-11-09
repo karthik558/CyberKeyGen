@@ -1,34 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" style="scrollbar-width: none; -ms-overflow-style: none; overflow: hidden;">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CyberKeyGen</title>
-  <style>
-    html, body, div, section, nav, main, article, aside {
-      scrollbar-width: none !important;
-      -ms-overflow-style: none !important;
-    }
-    
-    ::-webkit-scrollbar, 
-    ::-webkit-scrollbar-track, 
-    ::-webkit-scrollbar-thumb {
-      display: none !important;
-      width: 0 !important;
-      height: 0 !important;
-      background: transparent !important;
-    }
-  </style>
   <link rel="stylesheet" href="popup.css" />
   <link rel="icon" href="../icons/favicon.png" type="image/png" />
 </head>
 <body>
   <div class="container">
     <header>
-      <div class="logo">
-        <img id="headerIcon" src="../icons/icon-48.png" alt="CyberKeyGen Logo" data-light-icon="../icons/icon-48.png" data-dark-icon="../icons/icon-48-dark.png" />
-        <h1>CyberKeyGen</h1>
-      </div>
+      <p class="eyebrow">Security, simplified</p>
       <div class="header-actions">
         <button id="openOptions" class="header-btn" aria-label="Settings">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -55,9 +37,10 @@
       </div>
     </header>
     
-    <div class="website-banner">
-      <a href="#" id="webLink" class="web-link" target="_blank">For full experience, visit the website</a>
-    </div>
+    <section class="intro">
+      <h1>A stronger start.</h1>
+      <p>Generate a password. Make it yours.</p>
+    </section>
 
     <div class="tabs">
       <button class="tab-button active" data-tab="random">Random</button>
@@ -322,6 +305,7 @@
     </div>
   </div>
   <footer>
+    <a href="#" id="webLink" class="web-link" target="_blank" rel="noopener noreferrer">Open web app ↗</a>
     <div class="copyright">© 2026 CyberKeyGen • Created by <a href="https://karthiklal.in" id="authorLink" class="author-link" target="_blank">KARTHIK LAL</a></div>
   </footer>
   <script src="popup.js"></script>

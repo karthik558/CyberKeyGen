@@ -19,7 +19,9 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
       // Don't trigger shortcuts when typing in input fields
       if (
         document.activeElement instanceof HTMLInputElement ||
-        document.activeElement instanceof HTMLTextAreaElement
+        document.activeElement instanceof HTMLTextAreaElement ||
+        (document.activeElement instanceof HTMLElement && document.activeElement.isContentEditable) ||
+        document.querySelector('[role="dialog"][data-state="open"]')
       ) {
         return;
       }
