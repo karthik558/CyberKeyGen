@@ -172,12 +172,12 @@
 .password-library .library-actions { display: flex; flex-shrink: 0; gap: 6px; margin-left: auto; }
 .password-library .library-actions .ui-button { width: 44px; height: 44px; }
 @media (min-width: 1024px) {
-  .mobile-app-shell > main { padding-top: 12px; padding-bottom: 12px; }
-  .mobile-app-shell > footer { padding-bottom: 12px; }
-  .generator-header { position: relative; gap: 2px; padding: 16px 28px; }
+  .mobile-app-shell > main { padding-top: 32px; padding-bottom: 24px; }
+  .mobile-app-shell > footer { padding-top: 8px; padding-bottom: 20px; }
+  .generator-header { position: relative; gap: 2px; padding: 18px 28px; }
   .generator-header > div:first-child { min-height: 24px; padding-right: 56px; }
-  .generator-header > div:first-child > button { position: absolute; right: 28px; top: 16px; }
-  .generator-body { padding-top: 16px; padding-bottom: 16px; }
+  .generator-header > div:first-child > button { position: absolute; right: 28px; top: 18px; }
+  .generator-body { padding-top: 18px; padding-bottom: 18px; }
   .generator-workspace { row-gap: 16px; }
   .generator-customize [role="tabpanel"] .grid:not([aria-label="Quick password lengths"]) { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; }
   .generator-customize [role="tabpanel"] .grid:not([aria-label="Quick password lengths"]) > div { min-height: 44px; gap: 10px; padding: 8px 0; }
@@ -193,11 +193,12 @@
 }
 
 @media (min-width: 1024px) and (max-height: 850px) {
-  .mobile-app-shell > main, .mobile-app-shell > footer { padding-bottom: 4px; }
-  .generator-header { padding-top: 12px; padding-bottom: 12px; }
+  .mobile-app-shell > main { padding-top: 20px; padding-bottom: 16px; }
+  .mobile-app-shell > footer { padding-top: 4px; padding-bottom: 14px; }
+  .generator-header { padding-top: 14px; padding-bottom: 14px; }
   .generator-title { font-size: 30px; }
   .generator-header > p { font-size: 14px; line-height: 20px; }
-  .generator-body { padding-top: 12px; padding-bottom: 12px; }
+  .generator-body { padding-top: 14px; padding-bottom: 14px; }
   .generator-workspace { row-gap: 12px; }
   .generator-customize { padding: 16px; }
   .generator-customize > div:first-child { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }

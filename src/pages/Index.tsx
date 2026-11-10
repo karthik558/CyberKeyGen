@@ -12,12 +12,12 @@ const Index = () => {
   return (
     <ThemeProvider defaultTheme="dark">
       {isLoading ? <Preloader onComplete={finishLoading} /> : (
-        <div className="mobile-app-shell min-h-screen flex flex-col bg-background text-foreground">
-          <main className="w-full px-3 py-5 sm:px-6 sm:py-5 flex-grow">
+        <div className="mobile-app-shell min-h-screen flex flex-col justify-between bg-background text-foreground">
+          <main className="w-full px-4 py-8 sm:px-6 sm:py-10 md:py-12 flex-grow flex flex-col justify-center items-center">
             <PasswordGenerator headerActions={<ThemeToggle />} />
           </main>
           <ExtensionPromotion />
-          <footer className="px-4 pb-6 text-center text-xs text-muted-foreground">
+          <footer className="px-4 py-4 sm:py-6 text-center text-xs text-muted-foreground shrink-0">
             © 2026 CyberKeyGen · Created by{" "}
             <a href="https://karthiklal.in" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-foreground">Karthik Lal</a>
           </footer>
