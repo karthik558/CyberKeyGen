@@ -1,3 +1,11 @@
+/**
+ * EXPERIMENTAL PROTOTYPE - UNLINKED / NOT FOR PRODUCTION USE
+ * 
+ * This component is an experimental UI wireframe/prototype and is NOT linked into
+ * the production CyberKeyGen interface. It does NOT implement RFC 6238 TOTP (HMAC-SHA1/SHA256).
+ * Do NOT rely on this component for actual two-factor authentication.
+ */
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,8 +22,9 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Shield, Clock3 } from "lucide-react";
+import { Shield, Clock3, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { getSecureRandomInt } from "@/utils/cryptoGenerator";
 
 const TwoFactorGenerator = () => {
   const [code, setCode] = useState("000000");
@@ -26,10 +35,8 @@ const TwoFactorGenerator = () => {
   useEffect(() => {
     if (!isOpen) return;
     
-    // Generate a new code initially
     generateNewCode();
     
-    // Set a timer to count down
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -44,21 +51,19 @@ const TwoFactorGenerator = () => {
   }, [isOpen]);
   
   const generateNewCode = () => {
-    // In a real app, this would use a proper TOTP algorithm with the secret key
-    // This is just a simple example that generates a random 6-digit code
-    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setCode(newCode);
+    // Note: This is a prototype mockup, not RFC 6238 TOTP
+    const randomDigits = getSecureRandomInt(100000, 999999).toString();
+    setCode(randomDigits);
   };
   
   const handleCreateKey = () => {
-    // In a real app, this would generate a proper secret key for TOTP
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
     let key = "";
     for (let i = 0; i < 16; i++) {
-      key += chars.charAt(Math.floor(Math.random() * chars.length));
+      key += chars.charAt(getSecureRandomInt(0, chars.length - 1));
     }
     setSecretKey(key);
-    toast.success("New 2FA key generated");
+    toast.success("New prototype 2FA key generated");
   };
   
   return (
@@ -66,18 +71,28 @@ const TwoFactorGenerator = () => {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="h-9">
           <Shield className="h-4 w-4 mr-2" />
-          2FA Code
+          2FA Code (Prototype)
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Two-Factor Authentication
+            Two-Factor Authentication (Demo)
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-400 flex gap-2.5 items-start">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">Prototype Demonstration Only</p>
+              <p className="mt-0.5 opacity-90">
+                This feature is an experimental design concept and does not implement RFC 6238 TOTP algorithms. Do not use this for real account protection.
+              </p>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="secret-key">Secret Key</Label>
             <div className="flex gap-2">
@@ -85,20 +100,17 @@ const TwoFactorGenerator = () => {
                 id="secret-key"
                 value={secretKey}
                 onChange={(e) => setSecretKey(e.target.value)}
-                placeholder="Enter or generate a secret key"
-                className="font-mono"
+                placeholder="Enter or generate a demo key"
+                className="font-mono text-xs"
               />
               <Button onClick={handleCreateKey} type="button" size="sm">
                 Generate
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              In a real 2FA app, you would scan a QR code or enter this key
-            </p>
           </div>
           
           {secretKey && (
-            <>
+            <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label>Current Code</Label>
@@ -108,7 +120,7 @@ const TwoFactorGenerator = () => {
                   </div>
                 </div>
                 
-                <div className="flex justify-center py-4">
+                <div className="flex justify-center py-2">
                   <InputOTP maxLength={6} value={code} readOnly>
                     <InputOTPGroup>
                       {code.split('').map((_, index) => (
@@ -125,11 +137,7 @@ const TwoFactorGenerator = () => {
                   ></div>
                 </div>
               </div>
-              
-              <p className="text-xs text-muted-foreground">
-                This is a simplified demonstration. In a real application, the code would be generated using the TOTP algorithm.
-              </p>
-            </>
+            </div>
           )}
         </div>
       </DialogContent>

@@ -130,126 +130,190 @@ chrome.commands.onCommand.addListener((command) => {
   }
 });
 
-// Random password generation
+// Cryptographically secure randomness helpers
+function getSecureRandomInt(max) {
+  if (max <= 0) return 0;
+  if (max === 1) return 0;
+  const uint32Max = 0x100000000;
+  const limit = uint32Max - (uint32Max % max);
+  const buffer = new Uint32Array(1);
+  let rand;
+  do {
+    crypto.getRandomValues(buffer);
+    rand = buffer[0];
+  } while (rand >= limit);
+  return rand % max;
+}
+
+function getSecureRandomFloat() {
+  const buffer = new Uint32Array(1);
+  crypto.getRandomValues(buffer);
+  return buffer[0] / 0x100000000;
+}
+
+function getSecureRandomItem(items) {
+  return items[getSecureRandomInt(items.length)];
+}
+
+function secureShuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = getSecureRandomInt(i + 1);
+    const temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
+}
+
+const CHARSETS = {
+  lowercase: "abcdefghijklmnopqrstuvwxyz",
+  uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  numbers: "0123456789",
+  symbols: "!@#$%^&*()-_=+[]{}|;:,.<>?/~",
+  ambiguous: "0OIl1|[]{}(),.;:'\"/\\`~",
+};
+
+// Random password generation using cryptographic randomness
 function generateRandomPassword(options) {
   const { 
-    defaultLength: length, 
-    defaultIncludeLowercase: includeLowercase, 
-    defaultIncludeUppercase: includeUppercase, 
-    defaultIncludeNumbers: includeNumbers, 
-    defaultIncludeSymbols: includeSymbols, 
-    defaultExcludeAmbiguous: excludeAmbiguous,
-    defaultAvoidRepeating: avoidRepeating,
-    defaultPronounceable: usePronounceable
+    defaultLength: length = 16, 
+    defaultIncludeLowercase: includeLowercase = true, 
+    defaultIncludeUppercase: includeUppercase = true, 
+    defaultIncludeNumbers: includeNumbers = true, 
+    defaultIncludeSymbols: includeSymbols = true, 
+    defaultExcludeAmbiguous: excludeAmbiguous = false,
+    defaultAvoidRepeating: avoidRepeating = false,
+    defaultPronounceable: usePronounceable = false
   } = options;
   
   if (usePronounceable) {
     return generatePronounceablePassword(length, includeUppercase, includeNumbers, includeSymbols);
   }
   
-  let charset = '';
-  if (includeLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
-  if (includeUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  if (includeNumbers) charset += '0123456789';
-  if (includeSymbols) charset += '!@#$%^&*()_-+=[]{}|:;"\'<>,.?/~`';
-  
+  let lowerPool = includeLowercase ? CHARSETS.lowercase : "";
+  let upperPool = includeUppercase ? CHARSETS.uppercase : "";
+  let numberPool = includeNumbers ? CHARSETS.numbers : "";
+  let symbolPool = includeSymbols ? CHARSETS.symbols : "";
+
   if (excludeAmbiguous) {
-    charset = charset
-      .replace(/[0OIl1]/g, '')  // Ambiguous characters
-      .replace(/[{}[\]|;:'",.\/~`]/g, ''); // Complex symbols
+    const ambigSet = new Set(CHARSETS.ambiguous);
+    lowerPool = lowerPool.split("").filter(c => !ambigSet.has(c)).join("");
+    upperPool = upperPool.split("").filter(c => !ambigSet.has(c)).join("");
+    numberPool = numberPool.split("").filter(c => !ambigSet.has(c)).join("");
+    symbolPool = symbolPool.split("").filter(c => !ambigSet.has(c)).join("");
   }
-  
-  if (charset === '') charset = 'abcdefghijklmnopqrstuvwxyz';
-  
-  let password = '';
+
+  const selectedPools = [];
+  if (lowerPool) selectedPools.push(lowerPool);
+  if (upperPool) selectedPools.push(upperPool);
+  if (numberPool) selectedPools.push(numberPool);
+  if (symbolPool) selectedPools.push(symbolPool);
+
+  if (selectedPools.length === 0) {
+    lowerPool = CHARSETS.lowercase;
+    selectedPools.push(lowerPool);
+  }
+
+  const fullPool = selectedPools.join("");
+  const targetLength = Math.max(8, Math.min(128, length));
+  const effectiveLength = avoidRepeating ? Math.min(targetLength, fullPool.length) : targetLength;
+  const resultChars = [];
   const usedChars = new Set();
-  
-  for (let i = 0; i < length; i++) {
-    let char;
-    let attempts = 0;
-    const maxAttempts = 50;
-    
-    do {
-      const randomIndex = Math.floor(Math.random() * charset.length);
-      char = charset[randomIndex];
-      attempts++;
-      
-      if (!avoidRepeating || !usedChars.has(char) || attempts >= maxAttempts) {
-        break;
-      }
-    } while (avoidRepeating && usedChars.has(char));
-    
-    password += char;
-    usedChars.add(char);
-  }
-  
-  return password;
-}
 
-// Generate PIN
-function generatePin(length, avoidRepeating) {
-  const digits = '0123456789';
-  let pin = '';
-  const usedDigits = new Set();
-  
-  for (let i = 0; i < length; i++) {
-    let digit;
-    let attempts = 0;
-    const maxAttempts = 20;
-    
-    do {
-      const randomIndex = Math.floor(Math.random() * digits.length);
-      digit = digits[randomIndex];
-      attempts++;
-      
-      if (!avoidRepeating || !usedDigits.has(digit) || attempts >= maxAttempts) {
-        break;
-      }
-    } while (avoidRepeating && usedDigits.has(digit));
-    
-    pin += digit;
-    usedDigits.add(digit);
-  }
-  
-  return pin;
-}
+  for (const pool of selectedPools) {
+    if (resultChars.length < effectiveLength) {
+      let picked;
+      let attempts = 0;
+      do {
+        picked = getSecureRandomItem(pool);
+        attempts++;
+      } while (avoidRepeating && usedChars.has(picked) && attempts < 50);
 
-// Pronounceable password generation (simplified)
-function generatePronounceablePassword(length, includeUppercase = true, includeNumbers = true, includeSymbols = true) {
-  const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'y', 'z'];
-  const vowels = ['a', 'e', 'i', 'o', 'u'];
-  const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  const symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '-', '_', '+', '='];
-
-  const getRandomItem = (items) => items[Math.floor(Math.random() * items.length)];
-  
-  let password = '';
-  while (password.length < length) {
-    // Add a consonant-vowel pair
-    if (password.length + 2 <= length) {
-      password += getRandomItem(consonants) + getRandomItem(vowels);
-    } else {
-      password += getRandomItem([...consonants, ...vowels]);
+      resultChars.push(picked);
+      if (avoidRepeating) usedChars.add(picked);
     }
   }
 
-  // Ensure password has required character types
-  if (includeUppercase) {
-    const pos = Math.floor(Math.random() * password.length);
-    password = password.substring(0, pos) + password[pos].toUpperCase() + password.substring(pos + 1);
+  while (resultChars.length < effectiveLength) {
+    let picked;
+    let attempts = 0;
+    do {
+      picked = getSecureRandomItem(fullPool);
+      attempts++;
+    } while (avoidRepeating && usedChars.has(picked) && attempts < 50);
+
+    resultChars.push(picked);
+    if (avoidRepeating) usedChars.add(picked);
+  }
+
+  secureShuffle(resultChars);
+  return resultChars.join("");
+}
+
+// Generate PIN using cryptographic randomness
+function generatePin(length, avoidRepeating = false) {
+  const digits = CHARSETS.numbers;
+  const targetLength = Math.max(4, Math.min(12, length));
+
+  if (avoidRepeating) {
+    if (targetLength <= 10) {
+      const digitArr = digits.split("");
+      secureShuffle(digitArr);
+      return digitArr.slice(0, targetLength).join("");
+    }
+    const result = [];
+    let lastDigit = "";
+    for (let i = 0; i < targetLength; i++) {
+      let nextDigit;
+      do {
+        nextDigit = getSecureRandomItem(digits);
+      } while (nextDigit === lastDigit);
+      result.push(nextDigit);
+      lastDigit = nextDigit;
+    }
+    return result.join("");
+  }
+
+  const result = [];
+  for (let i = 0; i < targetLength; i++) {
+    result.push(getSecureRandomItem(digits));
+  }
+  return result.join("");
+}
+
+// Pronounceable password generation using cryptographic randomness
+function generatePronounceablePassword(length, includeUppercase = true, includeNumbers = true, includeSymbols = true) {
+  const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'y', 'z'];
+  const vowels = ['a', 'e', 'i', 'o', 'u'];
+  const consonantPairs = ['bl', 'br', 'ch', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'pl', 'pr', 'sh', 'sk', 'sl', 'sp', 'st', 'th', 'tr'];
+
+  const targetLength = Math.max(8, Math.min(128, length));
+  let pwd = '';
+  while (pwd.length < targetLength) {
+    const usePair = getSecureRandomFloat() < 0.25;
+    const cons = usePair ? getSecureRandomItem(consonantPairs) : getSecureRandomItem(consonants);
+    const vow = getSecureRandomItem(vowels);
+    pwd += cons + vow;
+  }
+
+  let chars = pwd.slice(0, targetLength).split("");
+
+  if (includeUppercase && chars.length > 0) {
+    const pos = getSecureRandomInt(chars.length);
+    chars[pos] = chars[pos].toUpperCase();
   }
   
-  if (includeNumbers) {
-    const pos = Math.floor(Math.random() * password.length);
-    password = password.substring(0, pos) + getRandomItem(numbers) + password.substring(pos + 1);
+  if (includeNumbers && chars.length > 1) {
+    const pos = getSecureRandomInt(chars.length);
+    chars[pos] = getSecureRandomItem(CHARSETS.numbers);
   }
   
-  if (includeSymbols) {
-    const pos = Math.floor(Math.random() * password.length);
-    password = password.substring(0, pos) + getRandomItem(symbols) + password.substring(pos + 1);
+  if (includeSymbols && chars.length > 2) {
+    const pos = getSecureRandomInt(chars.length);
+    chars[pos] = getSecureRandomItem(CHARSETS.symbols);
   }
   
-  return password;
+  return chars.join("");
 }
 
 // Calculate password strength

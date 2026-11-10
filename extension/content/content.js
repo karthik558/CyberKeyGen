@@ -4,113 +4,122 @@ if (location.origin === 'https://password.karthiklal.in' ||
   document.documentElement.setAttribute('data-cyberkeygen-extension', 'installed');
 }
 
-// Content script for CyberShield Password Generator
-// This script handles filling passwords into form fields
+// Content script for CyberKeyGen Password Generator
+// Handles autofilling passwords into web forms
 
-// Listen for messages from the popup or background script
+function setFieldValue(field, value) {
+  if (!field) return;
+
+  if (field.isContentEditable) {
+    field.focus();
+    field.textContent = value;
+    field.dispatchEvent(new InputEvent('input', { bubbles: true, cancelable: true }));
+    return;
+  }
+
+  // Use native prototype setter so frameworks (React, Angular, Vue) register the state change
+  const prototype = field instanceof HTMLTextAreaElement ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
+  const setter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
+
+  field.focus();
+  if (setter) {
+    setter.call(field, value);
+  } else {
+    field.value = value;
+  }
+
+  field.dispatchEvent(new Event('input', { bubbles: true }));
+  field.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function isElementVisible(el) {
+  if (!el || el.disabled || el.readOnly) return false;
+  const style = window.getComputedStyle(el);
+  if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+  return el.offsetWidth > 0 && el.offsetHeight > 0;
+}
+
+// Function to fill the password into active element or detected password fields
+function fillPasswordIntoActiveElement(password) {
+  if (!password) {
+    return { success: false, reason: 'empty_password' };
+  }
+
+  const activeElement = document.activeElement;
+  let filledCount = 0;
+
+  // 1. Check if the active element is directly an editable field
+  if (activeElement && (
+    activeElement.tagName === 'INPUT' || 
+    activeElement.tagName === 'TEXTAREA' || 
+    activeElement.isContentEditable
+  )) {
+    setFieldValue(activeElement, password);
+    filledCount++;
+
+    // If this was a password input inside a form, also fill confirmation field if present
+    if (activeElement.tagName === 'INPUT' && activeElement.type === 'password' && activeElement.form) {
+      const siblingPasswords = Array.from(activeElement.form.querySelectorAll('input[type="password"]'))
+        .filter(el => el !== activeElement && isElementVisible(el));
+      
+      for (const sibling of siblingPasswords) {
+        setFieldValue(sibling, password);
+        filledCount++;
+      }
+    }
+
+    return { success: true, count: filledCount };
+  }
+
+  // 2. If no focused input, search for visible password fields on the page
+  const visiblePasswordFields = Array.from(document.querySelectorAll('input[type="password"]'))
+    .filter(isElementVisible);
+
+  if (visiblePasswordFields.length > 0) {
+    // Fill up to 2 password fields (e.g. password + confirm password in the same form)
+    const primary = visiblePasswordFields[0];
+    setFieldValue(primary, password);
+    filledCount++;
+
+    const form = primary.form;
+    const related = visiblePasswordFields.filter(el => el !== primary && (!form || el.form === form));
+    for (const field of related.slice(0, 1)) {
+      setFieldValue(field, password);
+      filledCount++;
+    }
+
+    primary.focus();
+    return { success: true, count: filledCount };
+  }
+
+  // 3. Fallback: Search for inputs with password indicators in attributes
+  const possibleFields = Array.from(document.querySelectorAll('input[type="text"], input:not([type])'))
+    .filter(isElementVisible)
+    .filter(field => {
+      const name = (field.name || '').toLowerCase();
+      const id = (field.id || '').toLowerCase();
+      const placeholder = (field.placeholder || '').toLowerCase();
+      const autocomplete = (field.autocomplete || '').toLowerCase();
+      const aria = (field.getAttribute('aria-label') || '').toLowerCase();
+      return name.includes('pass') || id.includes('pass') || placeholder.includes('pass') ||
+             autocomplete.includes('password') || aria.includes('pass');
+    });
+
+  if (possibleFields.length > 0) {
+    const field = possibleFields[0];
+    setFieldValue(field, password);
+    field.focus();
+    return { success: true, count: 1 };
+  }
+
+  return { success: false, reason: 'no_input_found' };
+}
+
+// Listen for messages from popup or background script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'fillPassword') {
-    fillPasswordIntoActiveElement(message.password);
-    sendResponse({ success: true });
+    const result = fillPasswordIntoActiveElement(message.password);
+    sendResponse(result);
   }
   return true;
 });
-
-// Function to fill the password into the currently focused element
-function fillPasswordIntoActiveElement(password) {
-  // Get the active element
-  const activeElement = document.activeElement;
-  
-  // Check if the active element is an input field
-  if (activeElement && (
-      activeElement.tagName === 'INPUT' || 
-      activeElement.tagName === 'TEXTAREA' || 
-      activeElement.isContentEditable
-    )) {
-    
-    // Check if it's a password field, text field, or other input
-    if (activeElement.tagName === 'INPUT' && 
-        (activeElement.type === 'password' || activeElement.type === 'text' || 
-         activeElement.type === 'email' || activeElement.type === '')) {
-      // Set the value
-      activeElement.value = password;
-      
-      // Dispatch input event to trigger any listeners on the page
-      const inputEvent = new Event('input', { bubbles: true });
-      activeElement.dispatchEvent(inputEvent);
-      
-      // Dispatch change event
-      const changeEvent = new Event('change', { bubbles: true });
-      activeElement.dispatchEvent(changeEvent);
-    } 
-    // Handle content editable elements
-    else if (activeElement.isContentEditable) {
-      // Insert the password as text
-      activeElement.textContent = password;
-      
-      // Dispatch input event
-      const inputEvent = new InputEvent('input', {
-        bubbles: true,
-        cancelable: true
-      });
-      activeElement.dispatchEvent(inputEvent);
-    }
-    // Handle textareas
-    else if (activeElement.tagName === 'TEXTAREA') {
-      activeElement.value = password;
-      
-      // Dispatch events
-      const inputEvent = new Event('input', { bubbles: true });
-      activeElement.dispatchEvent(inputEvent);
-      
-      const changeEvent = new Event('change', { bubbles: true });
-      activeElement.dispatchEvent(changeEvent);
-    }
-  } 
-  // If no active element is focused, find password fields on the page
-  else {
-    // Find password fields first
-    const passwordFields = document.querySelectorAll('input[type="password"]');
-    
-    if (passwordFields.length > 0) {
-      // Fill the first password field
-      const field = passwordFields[0];
-      field.value = password;
-      
-      // Dispatch events
-      const inputEvent = new Event('input', { bubbles: true });
-      field.dispatchEvent(inputEvent);
-      
-      const changeEvent = new Event('change', { bubbles: true });
-      field.dispatchEvent(changeEvent);
-      
-      // Focus the field
-      field.focus();
-    } else {
-      // If no password field, look for any text input that might be a password field
-      const possiblePasswordFields = Array.from(document.querySelectorAll('input[type="text"]'))
-        .filter(field => {
-          const name = field.name.toLowerCase();
-          const id = field.id.toLowerCase();
-          const placeholder = field.placeholder.toLowerCase();
-          
-          return name.includes('pass') || id.includes('pass') || placeholder.includes('pass');
-        });
-      
-      if (possiblePasswordFields.length > 0) {
-        const field = possiblePasswordFields[0];
-        field.value = password;
-        
-        // Dispatch events
-        const inputEvent = new Event('input', { bubbles: true });
-        field.dispatchEvent(inputEvent);
-        
-        const changeEvent = new Event('change', { bubbles: true });
-        field.dispatchEvent(changeEvent);
-        
-        // Focus the field
-        field.focus();
-      }
-    }
-  }
-}

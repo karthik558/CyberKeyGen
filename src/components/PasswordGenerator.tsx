@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 import { createMixedPassword } from "@/utils/leetSpeakConverter";
 import { generatePronounceablePassword } from "@/utils/pronounceableGenerator";
+import { generateSecurePassword, generateSecurePin } from "@/utils/cryptoGenerator";
 import PasswordHistory from "./PasswordHistory";
 import PasswordFavorites from "./PasswordFavorites";
 import PasswordCategories from "./PasswordCategories";
@@ -148,21 +149,8 @@ const PasswordGenerator = ({ headerActions }: { headerActions?: React.ReactNode 
 
   const generateRandomPassword = () => {
     try {
-      if (settings.usePronounceable) {
-        const pronounceablePassword = generatePronounceablePassword(
-          settings.length,
-          settings.includeUppercase,
-          settings.includeNumbers,
-          settings.includeSymbols
-        );
-
-        applyGeneratedValue(pronounceablePassword, (final) => {
-          setPassword(final);
-        });
-        return;
-      }
-
       if (
+        !settings.usePronounceable &&
         !settings.includeLowercase &&
         !settings.includeUppercase &&
         !settings.includeNumbers &&
@@ -172,79 +160,17 @@ const PasswordGenerator = ({ headerActions }: { headerActions?: React.ReactNode 
         return;
       }
 
-      let availableChars = "";
-      const mustIncludeChars = [];
-
-      if (settings.includeLowercase) {
-        availableChars += lowercaseChars;
-        mustIncludeChars.push(lowercaseChars.charAt(Math.floor(Math.random() * lowercaseChars.length)));
-      }
-
-      if (settings.includeUppercase) {
-        availableChars += uppercaseChars;
-        mustIncludeChars.push(uppercaseChars.charAt(Math.floor(Math.random() * uppercaseChars.length)));
-      }
-
-      if (settings.includeNumbers) {
-        availableChars += numberChars;
-        mustIncludeChars.push(numberChars.charAt(Math.floor(Math.random() * numberChars.length)));
-      }
-
-      if (settings.includeSymbols) {
-        availableChars += symbolChars;
-        mustIncludeChars.push(symbolChars.charAt(Math.floor(Math.random() * symbolChars.length)));
-      }
-
-      if (settings.excludeAmbiguous) {
-        for (const char of ambiguousChars) {
-          availableChars = availableChars.replace(char, "");
-        }
-      }
-
-      let result = "";
-      const length = settings.length;
-
-      if (settings.requireAllTypes && mustIncludeChars.length > 0) {
-        result = mustIncludeChars.join("");
-
-        for (let i = result.length; i < length; i++) {
-          const nextChar = availableChars.charAt(Math.floor(Math.random() * availableChars.length));
-
-          if (settings.avoidRepeating && result.includes(nextChar)) {
-            let attemptCount = 0;
-            let uniqueChar = nextChar;
-
-            while (result.includes(uniqueChar) && attemptCount < 10) {
-              uniqueChar = availableChars.charAt(Math.floor(Math.random() * availableChars.length));
-              attemptCount++;
-            }
-
-            result += uniqueChar;
-          } else {
-            result += nextChar;
-          }
-        }
-
-        result = result.split("").sort(() => 0.5 - Math.random()).join("");
-      } else {
-        for (let i = 0; i < length; i++) {
-          const nextChar = availableChars.charAt(Math.floor(Math.random() * availableChars.length));
-
-          if (settings.avoidRepeating && result.includes(nextChar)) {
-            let attemptCount = 0;
-            let uniqueChar = nextChar;
-
-            while (result.includes(uniqueChar) && attemptCount < 10) {
-              uniqueChar = availableChars.charAt(Math.floor(Math.random() * availableChars.length));
-              attemptCount++;
-            }
-
-            result += uniqueChar;
-          } else {
-            result += nextChar;
-          }
-        }
-      }
+      const result = generateSecurePassword({
+        length: settings.length,
+        includeLowercase: settings.includeLowercase,
+        includeUppercase: settings.includeUppercase,
+        includeNumbers: settings.includeNumbers,
+        includeSymbols: settings.includeSymbols,
+        excludeAmbiguous: settings.excludeAmbiguous,
+        avoidRepeating: settings.avoidRepeating,
+        requireAllTypes: settings.requireAllTypes,
+        usePronounceable: settings.usePronounceable,
+      });
 
       applyGeneratedValue(result, (final) => {
         setPassword(final);
@@ -278,27 +204,7 @@ const PasswordGenerator = ({ headerActions }: { headerActions?: React.ReactNode 
 
   const generatePin = () => {
     try {
-      const length = pinSettings.length;
-      let result = "";
-
-      for (let i = 0; i < length; i++) {
-        const nextDigit = Math.floor(Math.random() * 10).toString();
-
-        if (pinSettings.avoidRepeating && result.includes(nextDigit)) {
-          let attemptCount = 0;
-          let uniqueDigit = nextDigit;
-
-          while (result.includes(uniqueDigit) && attemptCount < 10) {
-            uniqueDigit = Math.floor(Math.random() * 10).toString();
-            attemptCount++;
-          }
-
-          result += uniqueDigit;
-        } else {
-          result += nextDigit;
-        }
-      }
-
+      const result = generateSecurePin(pinSettings.length, pinSettings.avoidRepeating);
       applyGeneratedValue(result, (final) => {
         setPin(final);
       });

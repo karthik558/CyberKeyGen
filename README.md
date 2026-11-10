@@ -16,7 +16,7 @@ CyberKeyGen is a modern, secure password generator that helps you create strong,
 
 <div align="left">
 
-**Current Version: 3.2.0**
+**Current Version: 3.3.5**
 
 | Feature               | Status |
 | --------------------- | ------ |
@@ -162,12 +162,28 @@ The CyberKeyGen browser extension brings the password generator functionality di
 
 ### Extension Features
 
-- **Quick Password Generation**: Generate passwords with a single click
-- **Multiple Password Types**: Random passwords, pattern-based passwords, and PINs
-- **Direct Form Filling**: Fill passwords directly into login forms
-- **Password History & Favorites**: Track and save your passwords
+- **Quick Password Generation**: Generate cryptographically secure passwords with a single click
+- **Multiple Password Types**: Random passwords, pronounceable passwords, leet-speak patterns, and numeric PINs
+- **Direct Form Filling**: Fill passwords and confirmation fields directly into web forms with element verification
+- **Password History & Favorites**: Track and save your generated passwords
 - **Keyboard Shortcuts**: Generate passwords with Alt+Shift+G and open popup with Alt+P
-- **Dark/Light Mode**: Choose your preferred theme
+- **Dark/Light Mode**: Unified monochrome theme with automatic OS matching
+- **Persistent Storage**: Uses `chrome.storage.local` to safely retain user preferences, history, and favorites across browser restarts (compared to session storage in the web app)
+
+### Pre-Release & Packaging Verification
+
+Before publishing or releasing a new update, verify builds and extension packaging:
+
+```bash
+# 1. Run linter
+npm run lint
+
+# 2. Build web application
+npm run build
+
+# 3. Package extension zip into dist/
+npm run build:extension
+```
 
 ### Installation
 

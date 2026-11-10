@@ -1,3 +1,11 @@
+/**
+ * EXPERIMENTAL PROTOTYPE - UNLINKED / NOT FOR PRODUCTION USE
+ * 
+ * This component is an experimental prototype and is NOT linked into the CyberKeyGen production interface.
+ * It encodes data into a URL hash fragment for UI testing and does NOT provide end-to-end encryption
+ * (such as Web Crypto SubtleCrypto AES-GCM) or a zero-knowledge backend.
+ * Do NOT use this for sharing sensitive or production credentials.
+ */
 
 import React, { useState } from "react";
 import {
@@ -11,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Share2, Copy, CheckIcon } from "lucide-react";
+import { Share2, Copy, CheckIcon, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 
@@ -33,8 +41,7 @@ const PasswordSharing: React.FC<PasswordSharingProps> = ({ password, strength })
       return;
     }
     
-    // In a real app, this would create a secure link on a backend
-    // Here we'll create a mock link with encoded data in the fragment
+    // Wireframe mock: base64 fragment (NOT end-to-end encrypted)
     const data = {
       p: includePassword ? password : undefined,
       s: includeStrength ? strength : undefined,
@@ -45,22 +52,22 @@ const PasswordSharing: React.FC<PasswordSharingProps> = ({ password, strength })
     const link = `${window.location.origin}/shared#${encodedData}`;
     
     setShareLink(link);
-    toast.success("Share link generated!");
+    toast.info("Demo share link generated (unencrypted prototype)");
   };
   
   const copyShareLink = () => {
     if (!shareLink) {
       generateShareLink();
       setTimeout(() => {
-        navigator.clipboard.writeText(shareLink);
+        navigator.clipboard.writeText(shareLink).catch(() => {});
         setCopied(true);
-        toast.success("Link copied to clipboard!");
+        toast.success("Demo link copied to clipboard!");
         setTimeout(() => setCopied(false), 3000);
       }, 100);
     } else {
-      navigator.clipboard.writeText(shareLink);
+      navigator.clipboard.writeText(shareLink).catch(() => {});
       setCopied(true);
-      toast.success("Link copied to clipboard!");
+      toast.success("Demo link copied to clipboard!");
       setTimeout(() => setCopied(false), 3000);
     }
   };
@@ -70,21 +77,27 @@ const PasswordSharing: React.FC<PasswordSharingProps> = ({ password, strength })
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="h-9">
           <Share2 className="h-4 w-4 mr-2" />
-          Share Password
+          Share (Prototype)
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share2 className="h-5 w-5" />
-            Share Password Securely
+            Share Password (Demo Concept)
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
-          <p className="text-sm text-muted-foreground">
-            Generate a secure link to share your password with someone. The link will expire after the specified time.
-          </p>
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-400 flex gap-2.5 items-start">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">Unencrypted Prototype Only</p>
+              <p className="mt-0.5 opacity-90">
+                This is a mock UI demonstration. Links generated here are encoded in the URL hash and are not backed by zero-knowledge end-to-end encryption.
+              </p>
+            </div>
+          </div>
           
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -126,7 +139,7 @@ const PasswordSharing: React.FC<PasswordSharingProps> = ({ password, strength })
             {shareLink && (
               <div className="space-y-2">
                 <Label htmlFor="share-link" className="text-sm">
-                  Share Link
+                  Demo Link
                 </Label>
                 <div className="flex gap-2">
                   <Textarea
@@ -149,22 +162,15 @@ const PasswordSharing: React.FC<PasswordSharingProps> = ({ password, strength })
                     )}
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  This link will expire on {new Date(Date.now() + expirationHours * 60 * 60 * 1000).toLocaleString()}
-                </p>
               </div>
             )}
             
             <div className="flex justify-end space-x-2">
               <Button onClick={generateShareLink}>
-                Generate Share Link
+                Generate Demo Link
               </Button>
             </div>
           </div>
-          
-          <p className="text-xs text-muted-foreground">
-            Note: In a real application, the sharing would be handled via a secure server. This is a demo implementation.
-          </p>
         </div>
       </DialogContent>
     </Dialog>
