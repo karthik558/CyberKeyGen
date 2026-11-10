@@ -37,9 +37,14 @@ body {
   /* CRITICAL: NO transitions on html/body to prevent Chromium popup collapse */
 }
 
-/* Custom sleek scrollbar */
+/* Custom sleek website-style scrollbar */
+html, body {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
 body::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
 
 body::-webkit-scrollbar-track {
@@ -58,8 +63,8 @@ body::-webkit-scrollbar-thumb:hover {
 .container {
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  gap: 12px;
+  padding: 14px 16px;
+  gap: 10px;
   background: hsl(var(--card));
   min-height: 100%;
   box-sizing: border-box;
@@ -287,8 +292,8 @@ body::-webkit-scrollbar-thumb:hover {
 
 /* Primary Action Buttons */
 .action-buttons {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  display: flex;
+  align-items: center;
   gap: 8px;
   width: 100%;
 }
@@ -297,9 +302,9 @@ body::-webkit-scrollbar-thumb:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  height: 48px;
-  padding: 0 12px;
+  gap: 6px;
+  height: 38px;
+  padding: 0 10px;
   border-radius: var(--radius);
   font-size: 13px;
   font-weight: 500;
@@ -322,6 +327,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .btn-primary {
+  flex: 1.35;
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   border: 1px solid hsl(var(--primary));
@@ -338,7 +344,8 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .btn-outline {
-  background: transparent;
+  flex: 1;
+  background: hsl(var(--secondary) / 0.5);
   color: hsl(var(--foreground));
   border: 1px solid hsl(var(--border));
 }
@@ -948,11 +955,7 @@ input[type="range"]:focus-visible {
 }
 
 /* The web app's compact, single-column generator layout. */
-.header-intro { flex-basis: 100%; }
-.header-intro h1 { font-size: 26px; font-weight: 600; letter-spacing: -.045em; line-height: 1.15; }
-.header-intro p { margin-top: 8px; color: hsl(var(--muted-foreground)); }
 .eyebrow { color: hsl(var(--muted-foreground)); }
-.action-buttons > button:last-child { grid-column: 1 / -1; height: 36px; border-color: transparent; }
 .customize-card { display: block; }
 .customize-header { position: relative; padding-right: 24px; cursor: pointer; list-style: none; }
 .customize-header::-webkit-details-marker { display: none; }

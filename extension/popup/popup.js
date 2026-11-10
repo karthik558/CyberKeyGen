@@ -749,19 +749,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const showFillSuccess = (btn) => {
+    if (btn) {
+      const textSpan = btn.querySelector('.btn-text') || btn.querySelector('span');
+      if (textSpan) {
+        const origText = textSpan.textContent;
+        textSpan.textContent = 'Filled!';
+        setTimeout(() => { textSpan.textContent = origText; }, 1200);
+      }
+    }
+  };
+
   // Fill password in active webpage
   const fillPasswordBtn = document.getElementById('fillPassword');
   if (fillPasswordBtn) {
     fillPasswordBtn.addEventListener('click', () => {
       if (!passwordOutput || !passwordOutput.value) return;
+      showFillSuccess(fillPasswordBtn);
       if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           if (tabs && tabs[0]) {
             chrome.tabs.sendMessage(tabs[0].id, { 
               action: 'fillPassword', 
               password: passwordOutput.value 
+            }, () => {
+              setTimeout(() => window.close(), 200);
             });
-            window.close();
           }
         });
       }
@@ -772,14 +785,16 @@ document.addEventListener('DOMContentLoaded', () => {
   if (fillLeetBtn) {
     fillLeetBtn.addEventListener('click', () => {
       if (!leetOutput || !leetOutput.value) return;
+      showFillSuccess(fillLeetBtn);
       if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           if (tabs && tabs[0]) {
             chrome.tabs.sendMessage(tabs[0].id, { 
               action: 'fillPassword', 
               password: leetOutput.value 
+            }, () => {
+              setTimeout(() => window.close(), 200);
             });
-            window.close();
           }
         });
       }
@@ -790,14 +805,16 @@ document.addEventListener('DOMContentLoaded', () => {
   if (fillPinBtn) {
     fillPinBtn.addEventListener('click', () => {
       if (!pinOutput || !pinOutput.value) return;
+      showFillSuccess(fillPinBtn);
       if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           if (tabs && tabs[0]) {
             chrome.tabs.sendMessage(tabs[0].id, { 
               action: 'fillPassword', 
               password: pinOutput.value 
+            }, () => {
+              setTimeout(() => window.close(), 200);
             });
-            window.close();
           }
         });
       }
