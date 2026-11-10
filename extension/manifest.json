@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "CyberKeyGen",
   "description": "Quickly generate secure passwords with customizable options",
-  "version": "3.3.0",
+  "version": "3.3.5",
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {

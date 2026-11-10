@@ -1,74 +1,10 @@
+@import "../extension/shared/theme.css";
+
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 96%;
-    --foreground: 0 0% 7%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-
-    --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 0%;
-
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 40%;
-
-    --accent: 0 0% 95%;
-    --accent-foreground: 0 0% 0%;
-
-    --destructive: 0 0% 15%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 88%;
-    --input: 0 0% 88%;
-    --ring: 0 0% 0%;
-
-    --radius: 0.5rem;
-    --glow-color: transparent;
-  }
-
-  .dark {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 100%;
-
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 100%;
-
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 100%;
-
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
-
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 0 0% 13%;
-    --muted-foreground: 0 0% 68%;
-
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 0% 85%;
-    --destructive-foreground: 0 0% 0%;
-
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 0 0% 100%;
-
-    --glow-color: transparent;
-  }
-}
 
 @layer base {
   * {

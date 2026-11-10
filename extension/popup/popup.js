@@ -235,9 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
       tabs.forEach(t => {
         t.classList.remove('active');
         t.setAttribute('aria-selected', 'false');
+        t.tabIndex = -1;
       });
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
+      tab.tabIndex = 0;
       
       const tabId = tab.getAttribute('data-tab');
       document.querySelectorAll('.tab-content').forEach(content => {
@@ -252,6 +254,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tabId === 'pin' && pinOutput && !pinOutput.value && generatePinBtn) {
         generatePinBtn.click();
       }
+    });
+  });
+
+  // Match the web app's keyboard-accessible segmented tabs.
+  tabs.forEach((tab, index) => {
+    tab.addEventListener('keydown', event => {
+      let next;
+      if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+      else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = tabs.length - 1;
+      else return;
+      event.preventDefault();
+      tabs[next].focus();
+      tabs[next].click();
     });
   });
 
@@ -276,6 +293,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     strengthValue.textContent = text;
     strengthBar.className = 'strength-bar ' + strengthClass;
+    const meter = strengthBar.parentElement;
+    meter.setAttribute('aria-valuenow', ({ weak: 25, moderate: 50, strong: 75, 'very-strong': 100 })[strengthClass]);
+    meter.setAttribute('aria-valuetext', text);
   };
 
   // Password visibility toggle

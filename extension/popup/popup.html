@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CyberKeyGen | Password Generator</title>
+  <link rel="stylesheet" href="../shared/theme.css" />
   <link rel="stylesheet" href="popup.css" />
   <link rel="icon" href="../icons/favicon.png" type="image/png" />
 </head>
@@ -44,17 +45,21 @@
           </svg>
         </button>
       </div>
+      <div class="header-intro">
+        <h1>Strong passwords. Zero fuss.</h1>
+        <p>Create, customize, and copy in seconds.</p>
+      </div>
     </header>
 
     <!-- Segmented Tabs -->
-    <div class="segmented-tabs-list" role="tablist">
-      <button class="tab-button active" data-tab="random" role="tab" aria-selected="true">Random</button>
-      <button class="tab-button" data-tab="pattern" role="tab" aria-selected="false">From text</button>
-      <button class="tab-button" data-tab="pin" role="tab" aria-selected="false">PIN</button>
+    <div class="segmented-tabs-list" role="tablist" aria-label="Password type">
+      <button class="tab-button active" id="tab-random" data-tab="random" role="tab" aria-controls="random" tabindex="0" aria-selected="true">Random</button>
+      <button class="tab-button" id="tab-pattern" data-tab="pattern" role="tab" aria-controls="pattern" tabindex="-1" aria-selected="false">From text</button>
+      <button class="tab-button" id="tab-pin" data-tab="pin" role="tab" aria-controls="pin" tabindex="-1" aria-selected="false">PIN</button>
     </div>
 
     <!-- Tab 1: Random Password -->
-    <div id="random" class="tab-content active" role="tabpanel">
+    <div id="random" class="tab-content active" role="tabpanel" aria-labelledby="tab-random">
       <!-- Premium Password Display Card -->
       <div class="premium-display-card">
         <div class="display-card-header">
@@ -71,7 +76,7 @@
           </button>
         </div>
         <div class="password-field-wrap">
-          <input type="text" id="passwordOutput" class="password-value-input" readonly spellcheck="false" autocomplete="off" />
+          <input type="text" id="passwordOutput" class="password-value-input" aria-label="Generated password" readonly spellcheck="false" autocomplete="off" />
         </div>
         <p class="display-card-hint" id="passwordHint">16 characters · Generated in your browser</p>
       </div>
@@ -107,17 +112,18 @@
           <span class="strength-header-text">Password strength</span>
           <span class="strength-value">Strong</span>
         </div>
-        <div class="strength-bar-bg" role="progressbar" aria-label="Password strength">
+        <div class="strength-bar-bg" role="progressbar" aria-label="Password strength" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div class="strength-bar"></div>
         </div>
       </div>
 
       <!-- Settings / Customization Card -->
-      <div class="customize-card">
-        <div class="customize-header">
-          <h2 class="customize-title">Customize password</h2>
+      <details class="customize-card">
+        <summary class="customize-header">
+          <span class="customize-title">Customize password</span>
           <span class="customize-subtitle">Set your preferences, then generate.</span>
-        </div>
+        </summary>
+        <div class="customize-content">
 
         <!-- Website-Style Preset Dropdown -->
         <div class="setting-block">
@@ -279,11 +285,12 @@
             </label>
           </div>
         </div>
-      </div>
+        </div>
+      </details>
     </div>
 
     <!-- Tab 2: Pattern (From text) -->
-    <div id="pattern" class="tab-content" role="tabpanel">
+    <div id="pattern" class="tab-content" role="tabpanel" aria-labelledby="tab-pattern">
       <div class="input-card">
         <label for="baseText" class="setting-title">Your starting word or phrase</label>
         <input type="text" id="baseText" class="website-input text-input" placeholder="e.g. a quiet morning" />
@@ -295,7 +302,7 @@
           <span class="display-card-label">CONVERTED PASSWORD</span>
         </div>
         <div class="password-field-wrap">
-          <input type="text" id="leetOutput" class="password-value-input" readonly placeholder="Enter text above to convert" />
+          <input type="text" id="leetOutput" aria-label="Converted password" class="password-value-input" readonly placeholder="Enter text above to convert" />
         </div>
       </div>
 
@@ -325,14 +332,14 @@
     </div>
 
     <!-- Tab 3: PIN Generator -->
-    <div id="pin" class="tab-content" role="tabpanel">
+    <div id="pin" class="tab-content" role="tabpanel" aria-labelledby="tab-pin">
       <!-- Premium PIN Display Card -->
       <div class="premium-display-card">
         <div class="display-card-header">
           <span class="display-card-label">YOUR PIN</span>
         </div>
         <div class="password-field-wrap">
-          <input type="text" id="pinOutput" class="password-value-input pin-value-input" readonly spellcheck="false" autocomplete="off" />
+          <input type="text" id="pinOutput" aria-label="Generated PIN" class="password-value-input pin-value-input" readonly spellcheck="false" autocomplete="off" />
         </div>
         <p class="display-card-hint" id="pinHint">6 digits · Generated in your browser</p>
       </div>
@@ -363,7 +370,12 @@
       </div>
 
       <!-- PIN Settings Card -->
-      <div class="customize-card">
+      <details class="customize-card">
+        <summary class="customize-header">
+          <span class="customize-title">Customize PIN</span>
+          <span class="customize-subtitle">Set your preferences, then generate.</span>
+        </summary>
+        <div class="customize-content">
         <div class="setting-block">
           <div class="slider-header">
             <label for="pinLength" class="setting-title">PIN Length</label>
@@ -396,7 +408,8 @@
             </label>
           </div>
         </div>
-      </div>
+        </div>
+      </details>
     </div>
 
     <!-- Footer matching website -->

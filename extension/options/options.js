@@ -314,7 +314,7 @@ function loadPasswordHistory() {
     if (history.length === 0) {
       const emptyRow = document.createElement('tr');
       emptyRow.innerHTML = `
-        <td colspan="5" style="text-align: center; color: var(--muted-foreground); padding: 24px;">
+        <td colspan="5" style="text-align: center; color: hsl(var(--muted-foreground)); padding: 24px;">
           No password history found.
         </td>
       `;
@@ -422,7 +422,7 @@ function loadPasswordFavorites() {
     if (favorites.length === 0) {
       const emptyRow = document.createElement('tr');
       emptyRow.innerHTML = `
-        <td colspan="5" style="text-align: center; color: var(--muted-foreground); padding: 24px;">
+        <td colspan="5" style="text-align: center; color: hsl(var(--muted-foreground)); padding: 24px;">
           No favorites yet. Add passwords from your history.
         </td>
       `;
