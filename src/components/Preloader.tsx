@@ -22,7 +22,7 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   return (
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-5 bg-background text-foreground" role="status" aria-live="polite">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-card">
-        <KeyRound className="h-7 w-7" aria-hidden="true" />
+        <img src="/favicon.png" alt="CyberKeyGen" className="h-8 w-8 object-contain dark:invert-0 invert" />
       </div>
       <div className="text-center">
         <p className="text-lg font-semibold tracking-tight">CyberKeyGen</p>

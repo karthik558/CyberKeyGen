@@ -47,6 +47,18 @@ header {
   flex-shrink: 0;
 }
 
+.brand-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+body:not(.dark) .brand-logo {
+  filter: invert(1);
+}
+
 .logo h1 {
   font-size: 20px;
   font-weight: 600;

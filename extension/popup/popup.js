@@ -272,6 +272,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       document.body.classList.remove('dark');
     }
+    const headerIcon = document.getElementById('headerIcon');
+    if (headerIcon && headerIcon.tagName === 'IMG') {
+      const targetSrc = isDark ? headerIcon.getAttribute('data-dark-icon') : headerIcon.getAttribute('data-light-icon');
+      if (targetSrc) headerIcon.src = targetSrc;
+    }
   };
 
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {

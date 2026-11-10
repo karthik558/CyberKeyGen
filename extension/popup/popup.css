@@ -102,6 +102,18 @@ body::-webkit-scrollbar-thumb:hover {
   flex-shrink: 0;
 }
 
+.brand-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+body:not(.dark) .brand-logo {
+  filter: invert(1);
+}
+
 .header-actions {
   display: flex;
   align-items: center;

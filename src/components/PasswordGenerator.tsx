@@ -434,7 +434,7 @@ const PasswordGenerator = ({ headerActions }: { headerActions?: React.ReactNode 
         <CardHeader className="generator-header border-b border-border">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-              <ShieldCheck className="w-4 h-4" />
+              <img src="/favicon.png" alt="CyberKeyGen" className="w-4 h-4 object-contain dark:invert-0 invert" />
               <span className="generator-eyebrow">CyberKeyGen</span>
             </div>
             {headerActions}
